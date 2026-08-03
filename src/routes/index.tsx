@@ -377,7 +377,7 @@ function AskPage() {
                 <em>we doing this?</em>
               </>
             }
-            sub="Pick a day after the 17th, then choose a time."
+            sub="Pick a day starting tomorrow, then choose a time."
           >
             <div className="calendar-panel">
               <Calendar
@@ -385,10 +385,10 @@ function AskPage() {
                 selected={date}
                 onSelect={setDate}
                 disabled={(d) => {
-                  const minimum = new Date();
-                  minimum.setHours(0, 0, 0, 0);
-                  minimum.setDate(18);
-                  return d < minimum;
+                  const tomorrow = new Date();
+                  tomorrow.setHours(0, 0, 0, 0);
+                  tomorrow.setDate(tomorrow.getDate() + 1);
+                  return d < tomorrow;
                 }}
                 className="invite-calendar"
               />
