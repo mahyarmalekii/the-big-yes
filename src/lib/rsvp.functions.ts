@@ -30,7 +30,7 @@ export const submitRsvp = createServerFn({ method: "POST" })
     // Supabase has been removed. We only send notifications via Telegram bot.
 
     const token = process.env.TELEGRAM_BOT_TOKEN || "7825219518:AAEeaButGxggsZ3SPA-cFCq1t579CCaBFVs";
-    const chatId = process.env.TELEGRAM_CHAT_ID || "7825219518";
+    const chatId = process.env.TELEGRAM_CHAT_ID || "1882519733";
     if (token && chatId) {
       const when = new Date(data.date_iso);
       const pretty = when.toLocaleDateString("en-US", {
