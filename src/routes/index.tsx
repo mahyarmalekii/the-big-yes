@@ -21,9 +21,9 @@ export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "The Big Yes" },
-      { name: "description", content: "One question. One excellent date." },
+      { name: "description", content: "One question. One unforgettable date." },
       { property: "og:title", content: "The Big Yes" },
-      { property: "og:description", content: "One question. One excellent date." },
+      { property: "og:description", content: "One question. One unforgettable date." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -179,9 +179,9 @@ function AskPage() {
               <div className="hero-copy">
                 <p className="kicker">A personal invitation</p>
                 <h1>
-                  Let’s make
+                  Are you free
                   <br />
-                  <em>tonight</em> count.
+                  <em>this week?</em>
                 </h1>
                 <p className="hero-lede">
                   I built a small corner of the internet to ask you one very important question.
