@@ -6,6 +6,7 @@ type RsvpInput = {
   date_iso: string;
   time_slot: string;
   location_url?: string;
+  location_name?: string;
 };
 
 export const submitRsvp = createServerFn({ method: "POST" })
@@ -19,20 +20,14 @@ export const submitRsvp = createServerFn({ method: "POST" })
       throw new Error("Invalid date");
     if (typeof data.time_slot !== "string" || data.time_slot.length > 20)
       throw new Error("Invalid time");
-    if (data.location_url !== undefined && !/^https:\/\//.test(data.location_url))
-      throw new Error("Invalid location");
+    if (data.location_url !== undefined && data.location_url !== null && !/^https:\/\//.test(data.location_url))
+      throw new Error("Invalid location URL");
+    if (data.location_name !== undefined && data.location_name !== null && typeof data.location_name !== "string")
+      throw new Error("Invalid location name");
     return data;
   })
   .handler(async ({ data }) => {
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-
-    const { error } = await supabaseAdmin.from("rsvps").insert({
-      vibe: data.vibe,
-      choice: data.choice,
-      date_iso: data.date_iso,
-      time_slot: data.time_slot,
-    });
-    if (error) console.error("RSVP insert failed:", error);
+    // Supabase has been removed. We only send notifications via Telegram bot.
 
     const token = process.env.TELEGRAM_BOT_TOKEN;
     const chatId = process.env.TELEGRAM_CHAT_ID;
@@ -49,7 +44,8 @@ export const submitRsvp = createServerFn({ method: "POST" })
         `Pick: ${data.choice}\n` +
         `Date: ${pretty}\n` +
         `Time: ${data.time_slot}\n` +
-        (data.location_url ? `Location: ${data.location_url}\n\n` : "\n") +
+        (data.location_name ? `Place: ${data.location_name}\n` : "") +
+        (data.location_url ? `Maps: ${data.location_url}\n\n` : "\n") +
         `Don't blow it.`;
       try {
         await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {

@@ -39,9 +39,23 @@ type LocationPick = {
   url: string;
 };
 
-const LOCATION_LIST_URL = "https://maps.app.goo.gl/kpX3LKEKS694Rc2d8";
 const LOCATION_OPTIONS: LocationPick[] = [
-  { label: "A random spot from your Google Maps list", url: LOCATION_LIST_URL },
+  { label: "Pandoras", url: "https://www.google.com/maps/search/?api=1&query=Pandoras+Zossener+Str.+65+10961+Berlin" },
+  { label: "Luna D'Oro", url: "https://www.google.com/maps/search/?api=1&query=Luna+D%27Oro+Auguststraße+24+10117+Berlin" },
+  { label: "Mausi.", url: "https://www.google.com/maps/search/?api=1&query=Mausi.+Richardpl.+1+12055+Berlin" },
+  { label: "Café Pilz", url: "https://www.google.com/maps/search/?api=1&query=Caf%C3%A9+Pilz+Weisestra%C3%9Fe+58+12049+Berlin" },
+  { label: "Windhorst Bar", url: "https://www.google.com/maps/search/?api=1&query=Windhorst+Bar+Dorotheenstra%C3%9Fe+65+10117+Berlin" },
+  { label: "Bar Milano", url: "https://www.google.com/maps/search/?api=1&query=Bar+Milano+Brunnenstra%C3%9Fe+11+10119+Berlin" },
+  { label: "Bricks & Mortar", url: "https://www.google.com/maps/search/?api=1&query=Bricks+%26+Mortar+Voigtstra%C3%9Fe+42+10247+Berlin" },
+  { label: "Nathanja & Heinrich Café / Bar Neukölln", url: "https://www.google.com/maps/search/?api=1&query=Nathanja+%26+Heinrich+Caf%C3%A9+Bar+Neuk%C3%B6lln+Weichselstra%C3%9Fe+44+12045+Berlin" },
+  { label: "Ankerklause", url: "https://www.google.com/maps/search/?api=1&query=Ankerklause+Kottbusser+Damm+104+10967+Berlin" },
+  { label: "Donau115", url: "https://www.google.com/maps/search/?api=1&query=Donau115+Donaustra%C3%9Fe+115+12043+Berlin" },
+  { label: "Café am Neuen See", url: "https://www.google.com/maps/search/?api=1&query=Caf%C3%A9+am+Neuen+See+Lichtensteinallee+2+10787+Berlin" },
+  { label: "Honey Lou Bar", url: "https://www.google.com/maps/search/?api=1&query=Honey+Lou+Bar+Anzengruberstra%C3%9Fe+3+12043+Berlin" },
+  { label: "Bar39", url: "https://www.google.com/maps/search/?api=1&query=Bar39+Oranienstra%C3%9Fe+39+10999+Berlin" },
+  { label: "Café Luzia", url: "https://www.google.com/maps/search/?api=1&query=Caf%C3%A9+Luzia+Oranienstra%C3%9Fe+34+10999+Berlin" },
+  { label: "Brandi Espresso Bar", url: "https://www.google.com/maps/search/?api=1&query=Brandi+Espresso+Bar+Dieffenbachstra%C3%9Fe+63+10967+Berlin" },
+  { label: "Concierge Coffee", url: "https://www.google.com/maps/search/?api=1&query=Concierge+Coffee+Paul-Lincke-Ufer+39-40+10999+Berlin" },
 ];
 
 const FOOD = [
@@ -124,6 +138,7 @@ function AskPage() {
           date_iso: date.toISOString(),
           time_slot: time,
           location_url: assignedLocation.url,
+          location_name: assignedLocation.label,
         },
       });
     } catch (error) {
@@ -619,7 +634,7 @@ function Done({
         </div>
         {location && (
           <a className="location-link" href={location.url} target="_blank" rel="noreferrer">
-            Open the Google Maps list
+            Open in Google Maps
           </a>
         )}
       </section>
