@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="2" dy="2" stdDeviation="1" flood-color="#000" flood-opacity="0.25"/>
+    </filter>
+  </defs>
+
+  <!-- Legal Pad Sheet Body -->
+  <rect x="8" y="6" width="48" height="52" rx="4" fill="#fef7cd" stroke="#18181b" stroke-width="2.5" filter="url(#shadow)" />
+
+  <!-- Top Dark Leatherette Header -->
+  <path d="M8 10C8 7.79086 9.79086 6 12 6H52C54.2091 6 56 7.79086 56 10V14H8V10Z" fill="#18181b" />
+  <line x1="8" y1="14" x2="56" y2="14" stroke="#ca8a04" stroke-width="1.5" stroke-dasharray="2 2" />
+
+  <!-- Left Red Margin Lines -->
+  <line x1="20" y1="14" x2="20" y2="58" stroke="#dc2626" stroke-width="1.2" opacity="0.6" />
+  <line x1="22" y1="14" x2="22" y2="58" stroke="#dc2626" stroke-width="1.2" opacity="0.6" />
+
+  <!-- Horizontal Blue Ruling Lines -->
+  <line x1="8" y1="22" x2="56" y2="22" stroke="#3b82f6" stroke-width="1" opacity="0.3" />
+  <line x1="8" y1="30" x2="56" y2="30" stroke="#3b82f6" stroke-width="1" opacity="0.3" />
+  <line x1="8" y1="38" x2="56" y2="38" stroke="#3b82f6" stroke-width="1" opacity="0.3" />
+  <line x1="8" y1="46" x2="56" y2="46" stroke="#3b82f6" stroke-width="1" opacity="0.3" />
+
+  <!-- Bold Red Checkmark / Grade Check -->
+  <path d="M26 34L33 41L45 25" fill="none" stroke="#dc2626" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" />
+</svg>
