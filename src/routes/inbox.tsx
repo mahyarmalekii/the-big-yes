@@ -4,10 +4,7 @@ import { Inbox as InboxIcon, RefreshCw } from "lucide-react";
 
 export const Route = createFileRoute("/inbox")({
   head: () => ({
-    meta: [
-      { title: "Inbox" },
-      { name: "robots", content: "noindex, nofollow" },
-    ],
+    meta: [{ title: "Inbox" }, { name: "robots", content: "noindex, nofollow" }],
   }),
   component: Inbox,
 });
@@ -100,26 +97,27 @@ function Inbox() {
           </div>
         )}
 
-        {rsvps && rsvps.map((r) => {
-          const d = new Date(r.date_iso);
-          const when = isNaN(d.getTime())
-            ? r.date_iso
-            : d.toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" });
-          const submitted = new Date(r.created_at).toLocaleString();
-          return (
-            <div key={r.id} className="poster overflow-hidden">
-              <div className="bg-sage border-b-2 border-ink px-4 py-2 font-mono text-[10px] uppercase tracking-[0.2em]">
-                submitted · {submitted}
+        {rsvps &&
+          rsvps.map((r) => {
+            const d = new Date(r.date_iso);
+            const when = isNaN(d.getTime())
+              ? r.date_iso
+              : d.toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" });
+            const submitted = new Date(r.created_at).toLocaleString();
+            return (
+              <div key={r.id} className="poster overflow-hidden">
+                <div className="bg-sage border-b-2 border-ink px-4 py-2 font-mono text-[10px] uppercase tracking-[0.2em]">
+                  submitted · {submitted}
+                </div>
+                <div className="p-4 space-y-2">
+                  <RowKV k="vibe" v={r.vibe === "food" ? "food 🍽️" : "drinks 🥂"} />
+                  <RowKV k="pick" v={r.choice.toUpperCase()} />
+                  <RowKV k="when" v={when} />
+                  <RowKV k="time" v={r.time_slot} last />
+                </div>
               </div>
-              <div className="p-4 space-y-2">
-                <RowKV k="vibe" v={r.vibe === "food" ? "food 🍽️" : "drinks 🥂"} />
-                <RowKV k="pick" v={r.choice.toUpperCase()} />
-                <RowKV k="when" v={when} />
-                <RowKV k="time" v={r.time_slot} last />
-              </div>
-            </div>
-          );
-        })}
+            );
+          })}
       </div>
     </main>
   );
@@ -127,8 +125,12 @@ function Inbox() {
 
 function RowKV({ k, v, last }: { k: string; v: string; last?: boolean }) {
   return (
-    <div className={`grid grid-cols-[60px_1fr] items-baseline gap-3 py-1.5 ${!last ? "border-b border-dashed border-ink/30" : ""}`}>
-      <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">{k}</span>
+    <div
+      className={`grid grid-cols-[60px_1fr] items-baseline gap-3 py-1.5 ${!last ? "border-b border-dashed border-ink/30" : ""}`}
+    >
+      <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+        {k}
+      </span>
       <span className="font-display text-base text-right leading-tight">{v}</span>
     </div>
   );

@@ -20,16 +20,25 @@ export const submitRsvp = createServerFn({ method: "POST" })
       throw new Error("Invalid date");
     if (typeof data.time_slot !== "string" || data.time_slot.length > 20)
       throw new Error("Invalid time");
-    if (data.location_url !== undefined && data.location_url !== null && !/^https:\/\//.test(data.location_url))
+    if (
+      data.location_url !== undefined &&
+      data.location_url !== null &&
+      !/^https:\/\//.test(data.location_url)
+    )
       throw new Error("Invalid location URL");
-    if (data.location_name !== undefined && data.location_name !== null && typeof data.location_name !== "string")
+    if (
+      data.location_name !== undefined &&
+      data.location_name !== null &&
+      typeof data.location_name !== "string"
+    )
       throw new Error("Invalid location name");
     return data;
   })
   .handler(async ({ data }) => {
     // Supabase has been removed. We only send notifications via Telegram bot.
 
-    const token = process.env.TELEGRAM_BOT_TOKEN || "7825219518:AAEeaButGxggsZ3SPA-cFCq1t579CCaBFVs";
+    const token =
+      process.env.TELEGRAM_BOT_TOKEN || "7825219518:AAEeaButGxggsZ3SPA-cFCq1t579CCaBFVs";
     const chatId = process.env.TELEGRAM_CHAT_ID || "1882519733";
     if (token && chatId) {
       const when = new Date(data.date_iso);
