@@ -21,6 +21,9 @@ import {
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import { submitRsvp } from "@/lib/rsvp.functions";
+import { Sketch3DCanvas } from "@/components/3d/Sketch3DCanvas";
+import { TiltCard } from "@/components/3d/TiltCard";
+import { FloatingDoodles } from "@/components/visual/FloatingDoodles";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -217,9 +220,12 @@ function DatingApp() {
   };
 
   return (
-    <div className="legal-pad">
+    <div className="legal-pad relative">
+      {/* Floating Parallax Sketches & Transparent Doodles Layer */}
+      <FloatingDoodles />
+
       {/* Legal Pad Top Binding Header */}
-      <div className="legal-pad-header">
+      <div className="legal-pad-header z-10 relative">
         <div className="flex items-center gap-2">
           <span className="w-2.5 h-2.5 rounded-full bg-red-500 inline-block shadow-sm" />
           <span className="font-mono text-[11px] font-bold tracking-widest uppercase text-yellow-300">
@@ -231,7 +237,7 @@ function DatingApp() {
         </span>
       </div>
 
-      <div className="legal-pad-content">
+      <div className="legal-pad-content z-10">
         {/* Left red margin annotations */}
         <div className="absolute left-2 top-8 bottom-8 flex flex-col justify-between pointer-events-none select-none font-handwriting text-red-600/80 text-lg leading-tight w-12 text-right pr-2">
           <span>pop quiz</span>
@@ -239,7 +245,7 @@ function DatingApp() {
           <span>100%</span>
         </div>
 
-        {/* STEP 1: THE POP QUIZ (FAST ASK) */}
+        {/* STEP 1: THE POP QUIZ (FAST ASK) — HAS VIDEO 1 */}
         {step === "ask" && (
           <div className="enter-fade space-y-5">
             <div className="flex items-center justify-between border-b border-black/15 pb-2">
@@ -309,7 +315,7 @@ function DatingApp() {
           </div>
         )}
 
-        {/* OBJECTION 1 */}
+        {/* OBJECTION 1 — WITH 3D THREE.JS PAPER AIRPLANE */}
         {step === "sure1" && (
           <div className="enter-fade space-y-5">
             <div className="school-card p-5 bg-white space-y-4">
@@ -319,6 +325,10 @@ function DatingApp() {
                 </span>
                 <span className="font-handwriting text-lg text-black/50">review required</span>
               </div>
+
+              {/* 3D Three.js Interactive Sketch */}
+              <Sketch3DCanvas type="objection" height={120} />
+
               <h2 className="font-heading text-2xl leading-tight">
                 Wait. <br />
                 <span className="font-serif-italic text-3xl text-red-600">Are you sure?</span>
@@ -354,6 +364,10 @@ function DatingApp() {
                 </span>
                 <span className="font-handwriting text-lg text-black/50">last chance</span>
               </div>
+
+              {/* 3D Three.js Interactive Sketch */}
+              <Sketch3DCanvas type="objection" height={120} />
+
               <h2 className="font-heading text-2xl leading-tight">
                 Really <br />
                 <span className="font-serif-italic text-3xl text-red-600">sure sure?</span>
@@ -414,7 +428,7 @@ function DatingApp() {
           </div>
         )}
 
-        {/* STEP 2: VIBE CHECK (Food vs Drinks) */}
+        {/* STEP 2: VIBE CHECK (NO VIDEO — INCLUDES 3D THREE.JS SCENE + 3D TILT CARDS) */}
         {step === "vibe" && (
           <div className="enter-fade space-y-5">
             <div>
@@ -430,49 +444,62 @@ function DatingApp() {
               </p>
             </div>
 
+            {/* 3D Three.js Interactive Floating Sketch */}
+            <div className="school-card p-1 bg-white/70 backdrop-blur-xs relative overflow-hidden">
+              <div className="tape-strip -top-2 right-8 rotate-2" />
+              <Sketch3DCanvas type="vibe" height={150} />
+              <p className="text-center font-mono text-[10px] uppercase text-black/40 pb-1">
+                [ 3D Orbit: Tilt or Drag to Interact ]
+              </p>
+            </div>
+
             <div className="grid gap-3.5">
-              <button
+              <TiltCard
                 onClick={() => {
                   setVibe("drink");
                   setStep("drink");
                 }}
-                className="option-card-interactive group flex items-start gap-3.5"
+                className="option-card-interactive group"
               >
-                <div className="p-3 rounded-lg border-2 border-black bg-purple-100 text-purple-800 shadow-sm">
-                  <Wine size={24} />
-                </div>
-                <div className="flex-1">
-                  <div className="flex items-center justify-between">
-                    <span className="font-heading text-lg">Drinks</span>
-                    <span className="font-mono text-xs font-bold text-black/40">OPTION A</span>
+                <div className="flex items-start gap-3.5">
+                  <div className="p-3 rounded-lg border-2 border-black bg-purple-100 text-purple-800 shadow-sm">
+                    <Wine size={24} />
                   </div>
-                  <p className="text-xs text-black/70 mt-0.5">Wine or beer in a cozy warm-lit spot.</p>
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between">
+                      <span className="font-heading text-lg">Drinks</span>
+                      <span className="font-mono text-xs font-bold text-black/40">OPTION A</span>
+                    </div>
+                    <p className="text-xs text-black/70 mt-0.5">Wine or beer in a cozy warm-lit spot.</p>
+                  </div>
                 </div>
-              </button>
+              </TiltCard>
 
-              <button
+              <TiltCard
                 onClick={() => {
                   setVibe("food");
                   setStep("food");
                 }}
-                className="option-card-interactive group flex items-start gap-3.5"
+                className="option-card-interactive group"
               >
-                <div className="p-3 rounded-lg border-2 border-black bg-amber-100 text-amber-800 shadow-sm">
-                  <Utensils size={24} />
-                </div>
-                <div className="flex-1">
-                  <div className="flex items-center justify-between">
-                    <span className="font-heading text-lg">Food</span>
-                    <span className="font-mono text-xs font-bold text-black/40">OPTION B</span>
+                <div className="flex items-start gap-3.5">
+                  <div className="p-3 rounded-lg border-2 border-black bg-amber-100 text-amber-800 shadow-sm">
+                    <Utensils size={24} />
                   </div>
-                  <p className="text-xs text-black/70 mt-0.5">Italian pasta/pizza or Persian kabob feast.</p>
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between">
+                      <span className="font-heading text-lg">Food</span>
+                      <span className="font-mono text-xs font-bold text-black/40">OPTION B</span>
+                    </div>
+                    <p className="text-xs text-black/70 mt-0.5">Italian pasta/pizza or Persian kabob feast.</p>
+                  </div>
                 </div>
-              </button>
+              </TiltCard>
             </div>
           </div>
         )}
 
-        {/* STEP 3: FOOD OR DRINK SPECIFIC CHOICE */}
+        {/* STEP 3: FOOD OR DRINK SPECIFIC CHOICE (NO VIDEO — INCLUDES 3D THREE.JS SCENE + 3D TILT CARDS) */}
         {(step === "food" || step === "drink") && (
           <div className="enter-fade space-y-5">
             <div>
@@ -507,39 +534,51 @@ function DatingApp() {
               </p>
             </div>
 
+            {/* 3D Three.js Interactive Sketches for Food / Drink */}
+            <div className="school-card p-1 bg-white/70 backdrop-blur-xs relative overflow-hidden">
+              <div className="tape-strip -top-2 left-8 -rotate-2" />
+              <Sketch3DCanvas type={step === "food" ? "food" : "drink"} height={140} />
+              <p className="text-center font-mono text-[10px] uppercase text-black/40 pb-1">
+                [ Interactive 3D Wireframe Sketch ]
+              </p>
+            </div>
+
             <div className="grid gap-3">
               {options.map(({ id, label, sub, Icon, note }, idx) => {
                 const selected = pick === id;
                 return (
-                  <button
+                  <TiltCard
                     key={id}
                     onClick={() => setPick(id)}
-                    className={cn("option-card-interactive flex items-start gap-3.5", selected && "selected")}
+                    selected={selected}
+                    className={cn("option-card-interactive", selected && "selected")}
                   >
-                    <div
-                      className={cn(
-                        "p-3 rounded-lg border-2 border-black shadow-sm",
-                        selected ? "bg-yellow-300 text-black" : "bg-black/5 text-black/80",
+                    <div className="flex items-start gap-3.5">
+                      <div
+                        className={cn(
+                          "p-3 rounded-lg border-2 border-black shadow-sm",
+                          selected ? "bg-yellow-300 text-black" : "bg-black/5 text-black/80",
+                        )}
+                      >
+                        <Icon size={22} />
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between">
+                          <span className="font-heading text-base">{label}</span>
+                          <span className="font-mono text-xs font-bold text-black/40">0{idx + 1}</span>
+                        </div>
+                        <p className="text-xs text-black/70 mt-0.5">{sub}</p>
+                        <p className="font-handwriting text-sm text-blue-700 mt-1 font-semibold">
+                          * {note}
+                        </p>
+                      </div>
+                      {selected && (
+                        <div className="self-center p-1 rounded-full bg-black text-white">
+                          <Check size={14} />
+                        </div>
                       )}
-                    >
-                      <Icon size={22} />
                     </div>
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between">
-                        <span className="font-heading text-base">{label}</span>
-                        <span className="font-mono text-xs font-bold text-black/40">0{idx + 1}</span>
-                      </div>
-                      <p className="text-xs text-black/70 mt-0.5">{sub}</p>
-                      <p className="font-handwriting text-sm text-blue-700 mt-1 font-semibold">
-                        * {note}
-                      </p>
-                    </div>
-                    {selected && (
-                      <div className="self-center p-1 rounded-full bg-black text-white">
-                        <Check size={14} />
-                      </div>
-                    )}
-                  </button>
+                  </TiltCard>
                 );
               })}
             </div>
@@ -554,7 +593,7 @@ function DatingApp() {
           </div>
         )}
 
-        {/* STEP 4: CALENDAR & TIME */}
+        {/* STEP 4: CALENDAR & TIME (NO VIDEO — INCLUDES 3D THREE.JS CLOCK + 3D TILT CARDS) */}
         {step === "when" && (
           <div className="enter-fade space-y-5">
             <div>
@@ -578,8 +617,17 @@ function DatingApp() {
               </p>
             </div>
 
-            {/* Calendar on School Paper */}
-            <div className="school-card p-3.5 bg-white flex flex-col items-center relative">
+            {/* 3D Three.js Interactive Clock / Timepiece Scene */}
+            <div className="school-card p-1 bg-white/70 backdrop-blur-xs relative overflow-hidden">
+              <div className="tape-strip -top-2 right-12 rotate-3" />
+              <Sketch3DCanvas type="when" height={130} />
+              <p className="text-center font-mono text-[10px] uppercase text-black/40 pb-1">
+                [ 3D Timepiece &bull; Parallax Orbit ]
+              </p>
+            </div>
+
+            {/* Calendar on School Paper with 3D Tilt */}
+            <TiltCard maxTilt={5} className="school-card p-3.5 bg-white flex flex-col items-center relative">
               <div className="tape-strip -top-2 right-6 rotate-3" />
               <Calendar
                 mode="single"
@@ -593,7 +641,7 @@ function DatingApp() {
                 }}
                 className="w-full"
               />
-            </div>
+            </TiltCard>
 
             {/* Time Slot Selection */}
             {date && (
@@ -626,7 +674,7 @@ function DatingApp() {
           </div>
         )}
 
-        {/* STEP 5: CONFIRMATION / OFFICIAL DOCKET */}
+        {/* STEP 5: CONFIRMATION / OFFICIAL DOCKET — HAS CELEBRATION VIDEO 2 */}
         {step === "done" && (
           <div className="enter-fade space-y-5">
             <div className="school-card p-5 bg-white space-y-4 relative">
@@ -649,7 +697,7 @@ function DatingApp() {
                 </p>
               </div>
 
-              {/* Celebratory Video */}
+              {/* Celebratory Video 2 */}
               <div className="notebook-video-frame my-2">
                 <video autoPlay loop muted playsInline className="w-full h-auto max-h-48 object-cover">
                   <source src="/assets/video2.mp4" type="video/mp4" />
