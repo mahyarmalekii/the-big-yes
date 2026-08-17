@@ -16,7 +16,7 @@ import {
   Sparkles,
   Utensils,
   Wine,
-  FileCheck,
+  Send,
 } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
@@ -28,10 +28,10 @@ import { FloatingDoodles } from "@/components/visual/FloatingDoodles";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "The Big Yes — Official Date Docket" },
-      { name: "description", content: "Pop quiz: Will you go out with me?" },
+      { title: "The Big Yes — Personal Invitation" },
+      { name: "description", content: "A personal invitation. Are you free this week?" },
       { property: "og:title", content: "The Big Yes" },
-      { property: "og:description", content: "Pop quiz: Will you go out with me?" },
+      { property: "og:description", content: "A personal invitation. Are you free this week?" },
     ],
   }),
   component: DatingApp,
@@ -221,43 +221,43 @@ function DatingApp() {
 
   return (
     <div className="legal-pad relative">
-      {/* Floating Parallax Sketches & Transparent Doodles Layer */}
+      {/* Floating Parallax Doodles Layer */}
       <FloatingDoodles />
 
       {/* Legal Pad Top Binding Header */}
       <div className="legal-pad-header z-10 relative">
         <div className="flex items-center gap-2">
-          <span className="w-2.5 h-2.5 rounded-full bg-red-500 inline-block shadow-sm" />
+          <span className="w-2.5 h-2.5 rounded-full bg-brand-yellow inline-block shadow-sm" />
           <span className="font-mono text-[11px] font-bold tracking-widest uppercase text-yellow-300">
-            CONFIDENTIAL DOCKET #2026
+            THE BIG YES &bull; PERSONAL INVITATION
           </span>
         </div>
-        <span className="font-handwriting text-xl text-yellow-200 tracking-wide">
-          grade: a+
+        <span className="font-mono text-[10px] uppercase text-zinc-400 tracking-wider">
+          Berlin 2026
         </span>
       </div>
 
       <div className="legal-pad-content z-10">
         {/* Left red margin annotations */}
-        <div className="absolute left-2 top-8 bottom-8 flex flex-col justify-between pointer-events-none select-none font-handwriting text-red-600/80 text-lg leading-tight w-12 text-right pr-2">
-          <span>pop quiz</span>
-          <span className="rotate-[-90deg] my-auto">do not fold</span>
-          <span>100%</span>
+        <div className="absolute left-2 top-8 bottom-8 flex flex-col justify-between pointer-events-none select-none font-handwriting text-red-600/75 text-base leading-tight w-10 text-right pr-2">
+          <span>note</span>
+          <span className="rotate-[-90deg] my-auto">urgent</span>
+          <span>yes</span>
         </div>
 
-        {/* STEP 1: THE POP QUIZ (FAST ASK) — HAS VIDEO 1 */}
+        {/* STEP 1: THE FAST ASK — HAS VIDEO 1 */}
         {step === "ask" && (
           <div className="enter-fade space-y-5">
             <div className="flex items-center justify-between border-b border-black/15 pb-2">
               <div className="font-mono text-xs text-black/70">
-                NAME: <span className="font-bold text-black border-b border-black px-1.5">{name}</span>
+                FOR: <span className="font-bold text-black border-b border-black px-1">{name}</span>
               </div>
-              <span className="grade-stamp">PASSED</span>
+              <span className="status-stamp">INVITATION</span>
             </div>
 
             <div className="relative">
               <span className="font-handwriting text-2xl text-blue-700 block -rotate-1 mb-0.5">
-                question 1 (only 1 question on the exam):
+                a question with great potential:
               </span>
               <h1 className="font-heading text-3xl sm:text-4xl leading-[1.1] tracking-tight text-black">
                 Are you free <br />
@@ -268,28 +268,28 @@ function DatingApp() {
             </div>
 
             <p className="text-sm text-black/80 leading-relaxed font-medium">
-              I could have sent a low-effort text. Instead, I built this entire legal pad webpage. That should tell you something about my commitment to a great evening.
+              I could have sent a regular text. Instead, I built this entire handwritten legal pad webpage. That should tell you something about my commitment to a great evening.
             </p>
 
-            {/* School Notebook Framed Video */}
-            <div className="school-card p-2 bg-white rotate-[-1deg] my-2 relative">
+            {/* Framed Video */}
+            <div className="note-card p-2 bg-white rotate-[-1deg] my-2 relative">
               <div className="tape-strip -top-2.5 left-1/3 -rotate-2" />
-              <div className="notebook-video-frame">
+              <div className="video-frame-box">
                 <video autoPlay loop muted playsInline className="w-full h-auto max-h-52 object-cover">
                   <source src="/assets/video1.mp4" type="video/mp4" />
                 </video>
               </div>
               <p className="font-handwriting text-sm text-black/60 text-center mt-1">
-                figure 1.1: my honest reaction if you say yes
+                my honest reaction if you say yes
               </p>
             </div>
 
             <div className="pt-2 flex flex-col gap-3">
               <button
                 onClick={() => setStep("vibe")}
-                className="btn-school-primary w-full py-3.5 text-lg"
+                className="btn-primary-action w-full py-3.5 text-lg"
               >
-                YES [X] <ArrowRight size={20} />
+                YES, OBVIOUSLY <ArrowRight size={20} />
               </button>
 
               <div className="relative">
@@ -300,15 +300,15 @@ function DatingApp() {
                   style={{
                     transform: noPos.n ? `translate(${noPos.x}px, ${noPos.y}px)` : undefined,
                   }}
-                  className="btn-school-secondary w-full py-2.5 text-xs text-black/60 font-mono uppercase"
+                  className="btn-secondary-action w-full py-2.5 text-xs text-black/60 font-mono uppercase"
                 >
-                  [ ] no (incorrect answer)
+                  no thanks
                 </button>
               </div>
 
               {noPos.n > 2 && (
                 <p className="text-center font-handwriting text-lg text-red-600 font-bold -rotate-1">
-                  teacher's note: the "no" button is running away. Take the hint.
+                  * the "no" button is running away. Take the hint.
                 </p>
               )}
             </div>
@@ -318,12 +318,12 @@ function DatingApp() {
         {/* OBJECTION 1 — WITH 3D THREE.JS PAPER AIRPLANE */}
         {step === "sure1" && (
           <div className="enter-fade space-y-5">
-            <div className="school-card p-5 bg-white space-y-4">
+            <div className="note-card p-5 bg-white space-y-4">
               <div className="flex items-center justify-between border-b border-black/10 pb-2">
                 <span className="font-mono text-xs font-bold text-red-600 uppercase flex items-center gap-1.5">
-                  <FileCheck size={15} /> Detention Notice
+                  <Sparkles size={15} /> Objection Noted
                 </span>
-                <span className="font-handwriting text-lg text-black/50">review required</span>
+                <span className="font-handwriting text-lg text-black/50">are you sure?</span>
               </div>
 
               {/* 3D Three.js Interactive Sketch */}
@@ -339,13 +339,13 @@ function DatingApp() {
               <div className="space-y-2.5 pt-2">
                 <button
                   onClick={() => setStep("vibe")}
-                  className="btn-school-primary w-full py-3 text-base"
+                  className="btn-primary-action w-full py-3 text-base"
                 >
                   Fine, one date <ArrowRight size={18} />
                 </button>
                 <button
                   onClick={() => setStep("sure2")}
-                  className="btn-school-secondary w-full py-2.5 text-xs text-black/60 font-mono uppercase"
+                  className="btn-secondary-action w-full py-2.5 text-xs text-black/60 font-mono uppercase"
                 >
                   Yes, I am sure
                 </button>
@@ -357,12 +357,12 @@ function DatingApp() {
         {/* OBJECTION 2 */}
         {step === "sure2" && (
           <div className="enter-fade space-y-5">
-            <div className="school-card p-5 bg-white space-y-4">
+            <div className="note-card p-5 bg-white space-y-4">
               <div className="flex items-center justify-between border-b border-black/10 pb-2">
                 <span className="font-mono text-xs font-bold text-red-600 uppercase flex items-center gap-1.5">
-                  <Heart size={15} /> Final Warning
+                  <Heart size={15} /> Second Thoughts?
                 </span>
-                <span className="font-handwriting text-lg text-black/50">last chance</span>
+                <span className="font-handwriting text-lg text-black/50">think carefully</span>
               </div>
 
               {/* 3D Three.js Interactive Sketch */}
@@ -378,13 +378,13 @@ function DatingApp() {
               <div className="space-y-2.5 pt-2">
                 <button
                   onClick={() => setStep("vibe")}
-                  className="btn-school-primary w-full py-3 text-base"
+                  className="btn-primary-action w-full py-3 text-base"
                 >
                   Alright, one date <ArrowRight size={18} />
                 </button>
                 <button
                   onClick={() => setStep("rejected")}
-                  className="btn-school-secondary w-full py-2.5 text-xs text-black/60 font-mono uppercase"
+                  className="btn-secondary-action w-full py-2.5 text-xs text-black/60 font-mono uppercase"
                 >
                   Walking away
                 </button>
@@ -396,8 +396,8 @@ function DatingApp() {
         {/* REJECTED */}
         {step === "rejected" && (
           <div className="enter-fade space-y-5">
-            <div className="school-card p-5 bg-white space-y-4">
-              <span className="grade-stamp border-black text-black">FINAL REPORT</span>
+            <div className="note-card p-5 bg-white space-y-4">
+              <span className="status-stamp status-stamp-red">OFFICIAL RESULT</span>
               <h2 className="font-heading text-2xl">
                 Cool. <br />
                 <span className="font-serif-italic text-3xl text-black/60">Cool cool cool.</span>
@@ -420,9 +420,9 @@ function DatingApp() {
                   setStep("ask");
                   setNoPos({ x: 0, y: 0, n: 0 });
                 }}
-                className="btn-school-primary w-full py-3 text-base"
+                className="btn-primary-action w-full py-3 text-base"
               >
-                Wait, let me retake the test <RotateCcw size={18} />
+                Wait, let me try again <RotateCcw size={18} />
               </button>
             </div>
           </div>
@@ -433,19 +433,19 @@ function DatingApp() {
           <div className="enter-fade space-y-5">
             <div>
               <span className="font-mono text-xs text-blue-900 font-bold uppercase tracking-wider">
-                SECTION 01: VIBE SELECTION
+                STEP 01 / 03: THE VIBE
               </span>
               <h2 className="font-heading text-3xl tracking-tight text-black mt-1">
                 Feed you, or <br />
                 <span className="font-serif-italic text-4xl text-blue-800">hydrate first?</span>
               </h2>
               <p className="font-handwriting text-xl text-black/70 mt-0.5 -rotate-1">
-                pick one. Both options result in a stellar time.
+                pick one. Both options end with a great time.
               </p>
             </div>
 
             {/* 3D Three.js Interactive Floating Sketch */}
-            <div className="school-card p-1 bg-white/70 backdrop-blur-xs relative overflow-hidden">
+            <div className="note-card p-1 bg-white/70 backdrop-blur-xs relative overflow-hidden">
               <div className="tape-strip -top-2 right-8 rotate-2" />
               <Sketch3DCanvas type="vibe" height={150} />
               <p className="text-center font-mono text-[10px] uppercase text-black/40 pb-1">
@@ -468,7 +468,7 @@ function DatingApp() {
                   <div className="flex-1">
                     <div className="flex items-center justify-between">
                       <span className="font-heading text-lg">Drinks</span>
-                      <span className="font-mono text-xs font-bold text-black/40">OPTION A</span>
+                      <span className="font-mono text-xs font-bold text-black/40">01</span>
                     </div>
                     <p className="text-xs text-black/70 mt-0.5">Wine or beer in a cozy warm-lit spot.</p>
                   </div>
@@ -489,7 +489,7 @@ function DatingApp() {
                   <div className="flex-1">
                     <div className="flex items-center justify-between">
                       <span className="font-heading text-lg">Food</span>
-                      <span className="font-mono text-xs font-bold text-black/40">OPTION B</span>
+                      <span className="font-mono text-xs font-bold text-black/40">02</span>
                     </div>
                     <p className="text-xs text-black/70 mt-0.5">Italian pasta/pizza or Persian kabob feast.</p>
                   </div>
@@ -505,7 +505,7 @@ function DatingApp() {
             <div>
               <div className="flex items-center justify-between">
                 <span className="font-mono text-xs text-blue-900 font-bold uppercase tracking-wider">
-                  SECTION 02: THE SPECIFICS
+                  STEP 02 / 03: CUISINE & DRINK
                 </span>
                 <button
                   onClick={() => setStep("vibe")}
@@ -535,7 +535,7 @@ function DatingApp() {
             </div>
 
             {/* 3D Three.js Interactive Sketches for Food / Drink */}
-            <div className="school-card p-1 bg-white/70 backdrop-blur-xs relative overflow-hidden">
+            <div className="note-card p-1 bg-white/70 backdrop-blur-xs relative overflow-hidden">
               <div className="tape-strip -top-2 left-8 -rotate-2" />
               <Sketch3DCanvas type={step === "food" ? "food" : "drink"} height={140} />
               <p className="text-center font-mono text-[10px] uppercase text-black/40 pb-1">
@@ -586,7 +586,7 @@ function DatingApp() {
             <button
               disabled={!pick}
               onClick={() => setStep("when")}
-              className="btn-school-primary w-full py-3.5 text-base disabled:opacity-40 disabled:cursor-not-allowed"
+              className="btn-primary-action w-full py-3.5 text-base disabled:opacity-40 disabled:cursor-not-allowed"
             >
               Lock Choice & Pick Date <ArrowRight size={18} />
             </button>
@@ -599,7 +599,7 @@ function DatingApp() {
             <div>
               <div className="flex items-center justify-between">
                 <span className="font-mono text-xs text-green-900 font-bold uppercase tracking-wider">
-                  SECTION 03: APPOINTMENT
+                  STEP 03 / 03: DATE & TIME
                 </span>
                 <button
                   onClick={() => setStep(vibe === "food" ? "food" : "drink")}
@@ -609,16 +609,16 @@ function DatingApp() {
                 </button>
               </div>
               <h2 className="font-heading text-3xl tracking-tight text-black mt-1">
-                When is our <br />
-                <span className="font-serif-italic text-4xl text-green-800">appointment?</span>
+                When are we <br />
+                <span className="font-serif-italic text-4xl text-green-800">doing this?</span>
               </h2>
               <p className="font-handwriting text-xl text-black/70 mt-0.5 -rotate-1">
-                select a day starting tomorrow, then choose a time.
+                select any day starting tomorrow, then choose a time.
               </p>
             </div>
 
             {/* 3D Three.js Interactive Clock / Timepiece Scene */}
-            <div className="school-card p-1 bg-white/70 backdrop-blur-xs relative overflow-hidden">
+            <div className="note-card p-1 bg-white/70 backdrop-blur-xs relative overflow-hidden">
               <div className="tape-strip -top-2 right-12 rotate-3" />
               <Sketch3DCanvas type="when" height={130} />
               <p className="text-center font-mono text-[10px] uppercase text-black/40 pb-1">
@@ -626,8 +626,8 @@ function DatingApp() {
               </p>
             </div>
 
-            {/* Calendar on School Paper with 3D Tilt */}
-            <TiltCard maxTilt={5} className="school-card p-3.5 bg-white flex flex-col items-center relative">
+            {/* Calendar with 3D Tilt */}
+            <TiltCard maxTilt={5} className="note-card p-3.5 bg-white flex flex-col items-center relative">
               <div className="tape-strip -top-2 right-6 rotate-3" />
               <Calendar
                 mode="single"
@@ -648,7 +648,7 @@ function DatingApp() {
               <div className="space-y-2.5 enter-fade">
                 <div className="flex items-center gap-1.5">
                   <Clock size={15} className="text-black/70" />
-                  <span className="font-heading text-xs uppercase tracking-wider">Bell Time / Evening Slot</span>
+                  <span className="font-heading text-xs uppercase tracking-wider">Select an Evening Time</span>
                 </div>
                 <div className="grid grid-cols-3 gap-2">
                   {TIME_SLOTS.map((slot) => (
@@ -667,22 +667,22 @@ function DatingApp() {
             <button
               disabled={!date || !time || saving}
               onClick={confirm}
-              className="btn-school-primary w-full py-3.5 text-base disabled:opacity-40 disabled:cursor-not-allowed"
+              className="btn-primary-action w-full py-3.5 text-base disabled:opacity-40 disabled:cursor-not-allowed"
             >
-              {saving ? "Submitting to Linda..." : "Seal the Deal"} <Sparkles size={18} />
+              {saving ? "Locking it in..." : "Seal the Deal"} <Sparkles size={18} />
             </button>
           </div>
         )}
 
-        {/* STEP 5: CONFIRMATION / OFFICIAL DOCKET — HAS CELEBRATION VIDEO 2 */}
+        {/* STEP 5: CONFIRMATION / OFFICIAL RECEIPT — HAS CELEBRATION VIDEO 2 */}
         {step === "done" && (
           <div className="enter-fade space-y-5">
-            <div className="school-card p-5 bg-white space-y-4 relative">
+            <div className="note-card p-5 bg-white space-y-4 relative">
               <div className="tape-strip -top-2.5 left-8 -rotate-3" />
               
               <div className="flex items-center justify-between border-b border-black/10 pb-2">
-                <span className="grade-stamp">A+ APPROVED</span>
-                <span className="font-mono text-xs font-bold text-black/50">OFFICIAL DOCKET</span>
+                <span className="status-stamp status-stamp-green">CONFIRMED</span>
+                <span className="font-mono text-xs font-bold text-black/50">DATE RECEIPT</span>
               </div>
 
               <div className="space-y-1">
@@ -698,16 +698,16 @@ function DatingApp() {
               </div>
 
               {/* Celebratory Video 2 */}
-              <div className="notebook-video-frame my-2">
+              <div className="video-frame-box my-2">
                 <video autoPlay loop muted playsInline className="w-full h-auto max-h-48 object-cover">
                   <source src="/assets/video2.mp4" type="video/mp4" />
                 </video>
               </div>
 
-              {/* Receipt / Syllabus */}
+              {/* Receipt Breakdown */}
               <div className="border-2 border-black rounded-lg p-3.5 bg-yellow-50/70 space-y-2.5 font-mono text-xs">
                 <div className="flex justify-between items-center pb-1.5 border-b border-black/10">
-                  <span className="text-black/50 uppercase">Item</span>
+                  <span className="text-black/50 uppercase">Plan</span>
                   <span className="font-bold">
                     {pickLabel} {vibe === "food" ? "(Dinner)" : "(Drinks)"}
                   </span>
@@ -729,14 +729,14 @@ function DatingApp() {
                   <span className="font-bold">{time ?? "TBD"}</span>
                 </div>
                 <div className="flex justify-between items-center pb-1.5 border-b border-black/10">
-                  <span className="text-black/50 uppercase">Location</span>
+                  <span className="text-black/50 uppercase">Spot</span>
                   <span className="font-bold text-right truncate max-w-[190px]">
                     {location?.label ?? "Curated Spot"}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-black/50 uppercase">Homework</span>
-                  <span className="font-bold text-blue-900">Show up & be charming</span>
+                  <span className="text-black/50 uppercase">Dress Code</span>
+                  <span className="font-bold text-blue-900">Casual & cute</span>
                 </div>
               </div>
 
@@ -745,7 +745,7 @@ function DatingApp() {
                   href={location.url}
                   target="_blank"
                   rel="noreferrer"
-                  className="btn-school-secondary w-full py-2.5 text-xs font-mono font-bold"
+                  className="btn-secondary-action w-full py-2.5 text-xs font-mono font-bold"
                 >
                   <MapPin size={14} /> Open Venue on Google Maps
                 </a>
@@ -758,7 +758,7 @@ function DatingApp() {
                 </div>
                 <button
                   onClick={copy}
-                  className="btn-school-primary w-full py-2.5 text-xs font-mono font-bold"
+                  className="btn-primary-action w-full py-2.5 text-xs font-mono font-bold"
                 >
                   {copied ? (
                     <>
@@ -792,8 +792,8 @@ function DatingApp() {
 
         {/* Legal Pad Footer */}
         <footer className="mt-auto pt-6 pb-2 text-center border-t border-black/10">
-          <p className="font-handwriting text-lg text-black/50">
-            handcrafted with unnecessary effort &bull; study hall 2026
+          <p className="font-mono text-[10px] uppercase tracking-wider text-black/40">
+            The Big Yes &bull; Made with good intentions &bull; 2026
           </p>
         </footer>
       </div>
