@@ -299,11 +299,11 @@ export const Sketch3DCanvas: React.FC<Sketch3DCanvasProps> = ({
 
     // 7. Animation Loop
     let animationFrameId: number;
-    let clock = new THREE.Clock();
+    const startTime = performance.now();
 
     const animate = () => {
       animationFrameId = requestAnimationFrame(animate);
-      const elapsedTime = clock.getElapsedTime();
+      const elapsedTime = (performance.now() - startTime) / 1000;
 
       // Smooth Orbit Lerp
       group.rotation.y += (targetRotY - group.rotation.y) * 0.06;
