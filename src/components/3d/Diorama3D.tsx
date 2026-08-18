@@ -11,7 +11,7 @@ interface Diorama3DProps {
 export const Diorama3D: React.FC<Diorama3DProps> = ({
   highlight = null,
   className = "",
-  height = 310,
+  height = 290,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [loaded, setLoaded] = useState(false);
@@ -25,10 +25,9 @@ export const Diorama3D: React.FC<Diorama3DProps> = ({
     // 1. Scene & Renderer
     const scene = new THREE.Scene();
 
-    // 2. Frontal 3/4 Perspective Camera tailored to Stefano Colferai tabletop shot
-    const camera = new THREE.PerspectiveCamera(38, width / height, 0.1, 50);
-    camera.position.set(0, -3.8, 2.1);
-    camera.lookAt(0, 0, 1.25);
+    const camera = new THREE.PerspectiveCamera(40, width / height, 0.1, 50);
+    camera.position.set(0, 0.35, 3.6);
+    camera.lookAt(0, 0, 0);
 
     const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
     renderer.setSize(width, height);
@@ -36,41 +35,41 @@ export const Diorama3D: React.FC<Diorama3DProps> = ({
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.35;
+    renderer.toneMappingExposure = 1.3;
     container.appendChild(renderer.domElement);
 
-    // 3. Studio Claymation Softbox Lighting
-    const ambientLight = new THREE.AmbientLight(0xfffbeb, 2.0);
+    // 2. Studio Claymation Softbox Lighting
+    const ambientLight = new THREE.AmbientLight(0xfffbeb, 2.2);
     scene.add(ambientLight);
 
-    const keySoftbox = new THREE.DirectionalLight(0xffedd5, 3.2);
-    keySoftbox.position.set(3, -3.5, 4.5);
+    const keySoftbox = new THREE.DirectionalLight(0xffedd5, 3.0);
+    keySoftbox.position.set(3, 5, 4);
     keySoftbox.castShadow = true;
     keySoftbox.shadow.mapSize.width = 1024;
     keySoftbox.shadow.mapSize.height = 1024;
     keySoftbox.shadow.bias = -0.001;
     scene.add(keySoftbox);
 
-    const fillBlue = new THREE.DirectionalLight(0x7dd3fc, 1.5);
-    fillBlue.position.set(-3, -2.5, 3.0);
-    scene.add(fillBlue);
+    const fillSky = new THREE.DirectionalLight(0x7dd3fc, 1.4);
+    fillSky.position.set(-3, 3, 2);
+    scene.add(fillSky);
 
-    // Warm overhead lamp spot
-    const lampGlow = new THREE.PointLight(0xfef08a, 2.0, 4);
-    lampGlow.position.set(0, -0.1, 2.2);
-    scene.add(lampGlow);
-
-    // 4. Load Claymation Model
+    // 3. Load Clay Diorama
     const loader = new GLTFLoader();
     let mixer: THREE.AnimationMixer | null = null;
     const dioramaGroup = new THREE.Group();
-    dioramaGroup.position.set(0, 0, -0.3);
     scene.add(dioramaGroup);
 
     loader.load(
       "/assets/diorama.glb",
       (gltf) => {
         const model = gltf.scene;
+
+        // Auto-center model at origin
+        const box = new THREE.Box3().setFromObject(model);
+        const center = box.getCenter(new THREE.Vector3());
+        model.position.sub(center);
+
         model.traverse((child) => {
           if ((child as THREE.Mesh).isMesh) {
             child.castShadow = true;
@@ -93,7 +92,7 @@ export const Diorama3D: React.FC<Diorama3DProps> = ({
       (err) => console.warn("Error loading clay diorama:", err)
     );
 
-    // 5. Subtle Mouse Parallax
+    // 4. Subtle Mouse Parallax
     let targetRotY = 0;
     let targetRotX = 0;
 
@@ -101,13 +100,13 @@ export const Diorama3D: React.FC<Diorama3DProps> = ({
       const rect = container.getBoundingClientRect();
       const x = ((e.clientX - rect.left) / rect.width - 0.5) * 2;
       const y = ((e.clientY - rect.top) / rect.height - 0.5) * 2;
-      targetRotY = x * 0.22;
-      targetRotX = -y * 0.12;
+      targetRotY = x * 0.35;
+      targetRotX = -y * 0.15;
     };
 
     window.addEventListener("mousemove", handleMouseMove);
 
-    // 6. Stop-motion loop with interactive highlights
+    // 5. Animation Loop
     let animationFrameId: number;
     let lastTime = performance.now();
 
@@ -119,7 +118,8 @@ export const Diorama3D: React.FC<Diorama3DProps> = ({
 
       if (mixer) mixer.update(delta);
 
-      dioramaGroup.rotation.z += (targetRotY - dioramaGroup.rotation.z) * 0.06;
+      // Smooth parallax
+      dioramaGroup.rotation.y += (targetRotY - dioramaGroup.rotation.y) * 0.06;
       dioramaGroup.rotation.x += (targetRotX - dioramaGroup.rotation.x) * 0.06;
 
       // Dynamic Highlighting pulse
