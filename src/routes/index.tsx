@@ -16,12 +16,12 @@ import {
   Sparkles,
   Utensils,
   Wine,
-  Send,
 } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import { submitRsvp } from "@/lib/rsvp.functions";
 import { Sketch3DCanvas } from "@/components/3d/Sketch3DCanvas";
+import { Diorama3D } from "@/components/3d/Diorama3D";
 import { TiltCard } from "@/components/3d/TiltCard";
 import { FloatingDoodles } from "@/components/visual/FloatingDoodles";
 
@@ -129,6 +129,7 @@ function DatingApp() {
   const [name, setName] = useState("YOU");
   const [step, setStep] = useState<Step>("ask");
   const [vibe, setVibe] = useState<Vibe>(null);
+  const [hoverVibe, setHoverVibe] = useState<"food" | "drink" | null>(null);
   const [pick, setPick] = useState<string | null>(null);
   const [date, setDate] = useState<Date | undefined>();
   const [time, setTime] = useState<string | null>(null);
@@ -326,7 +327,6 @@ function DatingApp() {
                 <span className="font-handwriting text-lg text-black/50">are you sure?</span>
               </div>
 
-              {/* 3D Three.js Interactive Sketch */}
               <Sketch3DCanvas type="objection" height={120} />
 
               <h2 className="font-heading text-2xl leading-tight">
@@ -365,7 +365,6 @@ function DatingApp() {
                 <span className="font-handwriting text-lg text-black/50">think carefully</span>
               </div>
 
-              {/* 3D Three.js Interactive Sketch */}
               <Sketch3DCanvas type="objection" height={120} />
 
               <h2 className="font-heading text-2xl leading-tight">
@@ -428,7 +427,7 @@ function DatingApp() {
           </div>
         )}
 
-        {/* STEP 2: VIBE CHECK (NO VIDEO — INCLUDES 3D THREE.JS SCENE + 3D TILT CARDS) */}
+        {/* STEP 2: VIBE CHECK — FEATURES 3D BLENDER MINIATURE DIORAMA */}
         {step === "vibe" && (
           <div className="enter-fade space-y-5">
             <div>
@@ -444,12 +443,12 @@ function DatingApp() {
               </p>
             </div>
 
-            {/* 3D Three.js Interactive Floating Sketch */}
-            <div className="note-card p-1 bg-white/70 backdrop-blur-xs relative overflow-hidden">
+            {/* 3D Blender Diorama Scene with Interactive Highlighting */}
+            <div className="note-card p-1 bg-white/75 backdrop-blur-xs relative overflow-hidden">
               <div className="tape-strip -top-2 right-8 rotate-2" />
-              <Sketch3DCanvas type="vibe" height={150} />
+              <Diorama3D highlight={hoverVibe} height={230} />
               <p className="text-center font-mono text-[10px] uppercase text-black/40 pb-1">
-                [ 3D Orbit: Tilt or Drag to Interact ]
+                [ 3D Date Diorama &bull; Drag to Orbit ]
               </p>
             </div>
 
@@ -461,7 +460,11 @@ function DatingApp() {
                 }}
                 className="option-card-interactive group"
               >
-                <div className="flex items-start gap-3.5">
+                <div
+                  onMouseEnter={() => setHoverVibe("drink")}
+                  onMouseLeave={() => setHoverVibe(null)}
+                  className="flex items-start gap-3.5"
+                >
                   <div className="p-3 rounded-lg border-2 border-black bg-purple-100 text-purple-800 shadow-sm">
                     <Wine size={24} />
                   </div>
@@ -482,7 +485,11 @@ function DatingApp() {
                 }}
                 className="option-card-interactive group"
               >
-                <div className="flex items-start gap-3.5">
+                <div
+                  onMouseEnter={() => setHoverVibe("food")}
+                  onMouseLeave={() => setHoverVibe(null)}
+                  className="flex items-start gap-3.5"
+                >
                   <div className="p-3 rounded-lg border-2 border-black bg-amber-100 text-amber-800 shadow-sm">
                     <Utensils size={24} />
                   </div>
@@ -499,7 +506,7 @@ function DatingApp() {
           </div>
         )}
 
-        {/* STEP 3: FOOD OR DRINK SPECIFIC CHOICE (NO VIDEO — INCLUDES 3D THREE.JS SCENE + 3D TILT CARDS) */}
+        {/* STEP 3: FOOD OR DRINK SPECIFIC CHOICE */}
         {(step === "food" || step === "drink") && (
           <div className="enter-fade space-y-5">
             <div>
@@ -534,7 +541,7 @@ function DatingApp() {
               </p>
             </div>
 
-            {/* 3D Three.js Interactive Sketches for Food / Drink */}
+            {/* 3D Interactive Sketches for Food / Drink */}
             <div className="note-card p-1 bg-white/70 backdrop-blur-xs relative overflow-hidden">
               <div className="tape-strip -top-2 left-8 -rotate-2" />
               <Sketch3DCanvas type={step === "food" ? "food" : "drink"} height={140} />
@@ -593,7 +600,7 @@ function DatingApp() {
           </div>
         )}
 
-        {/* STEP 4: CALENDAR & TIME (NO VIDEO — INCLUDES 3D THREE.JS CLOCK + 3D TILT CARDS) */}
+        {/* STEP 4: CALENDAR & TIME */}
         {step === "when" && (
           <div className="enter-fade space-y-5">
             <div>
@@ -617,7 +624,7 @@ function DatingApp() {
               </p>
             </div>
 
-            {/* 3D Three.js Interactive Clock / Timepiece Scene */}
+            {/* 3D Timepiece Scene */}
             <div className="note-card p-1 bg-white/70 backdrop-blur-xs relative overflow-hidden">
               <div className="tape-strip -top-2 right-12 rotate-3" />
               <Sketch3DCanvas type="when" height={130} />
