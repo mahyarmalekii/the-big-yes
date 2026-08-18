@@ -11,11 +11,10 @@ interface Diorama3DProps {
 export const Diorama3D: React.FC<Diorama3DProps> = ({
   highlight = null,
   className = "",
-  height = 240,
+  height = 280,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [loaded, setLoaded] = useState(false);
-  const modelRef = useRef<THREE.Group | null>(null);
 
   useEffect(() => {
     if (!containerRef.current || typeof window === "undefined") return;
@@ -26,21 +25,10 @@ export const Diorama3D: React.FC<Diorama3DProps> = ({
     // 1. Scene & Renderer
     const scene = new THREE.Scene();
 
-    // 2. Orthographic Camera for contemporary editorial illustration look
-    const aspect = width / height;
-    const frustumSize = 5.2;
-    const camera = new THREE.OrthographicCamera(
-      (-frustumSize * aspect) / 2,
-      (frustumSize * aspect) / 2,
-      frustumSize / 2,
-      -frustumSize / 2,
-      0.1,
-      100
-    );
-
-    // 3/4 Elevated View
-    camera.position.set(4.5, 4.0, 4.5);
-    camera.lookAt(0, 0.85, 0);
+    // 2. Perspective Camera with cinematic 3/4 view focused on couple
+    const camera = new THREE.PerspectiveCamera(36, width / height, 0.1, 50);
+    camera.position.set(3.4, 3.2, 3.8);
+    camera.lookAt(0, 0.95, 0);
 
     const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
     renderer.setSize(width, height);
@@ -48,30 +36,36 @@ export const Diorama3D: React.FC<Diorama3DProps> = ({
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.15;
+    renderer.toneMappingExposure = 1.25;
     container.appendChild(renderer.domElement);
 
-    // 3. Studio Lighting
-    const ambientLight = new THREE.AmbientLight(0xfffbeb, 1.4);
+    // 3. Studio Lighting for Rich Clay/Toy Shading
+    const ambientLight = new THREE.AmbientLight(0xfff7ed, 1.8);
     scene.add(ambientLight);
 
-    const sunLight = new THREE.DirectionalLight(0xffedd5, 2.2);
-    sunLight.position.set(5, 8, 4);
-    sunLight.castShadow = true;
-    sunLight.shadow.mapSize.width = 1024;
-    sunLight.shadow.mapSize.height = 1024;
-    scene.add(sunLight);
+    const keySun = new THREE.DirectionalLight(0xffedd5, 2.8);
+    keySun.position.set(4, 7, 3.5);
+    keySun.castShadow = true;
+    keySun.shadow.mapSize.width = 1024;
+    keySun.shadow.mapSize.height = 1024;
+    keySun.shadow.bias = -0.001;
+    scene.add(keySun);
 
-    const fillLight = new THREE.PointLight(0x60a5fa, 1.2, 12);
-    fillLight.position.set(-4, 3, -3);
-    scene.add(fillLight);
+    const fillBlue = new THREE.DirectionalLight(0x93c5fd, 1.2);
+    fillBlue.position.set(-4, 3, -3);
+    scene.add(fillBlue);
 
-    // 4. Load Blender Diorama GLB
+    // Warm Lantern Glow
+    const lanternLight = new THREE.PointLight(0xfef08a, 2.5, 5);
+    lanternLight.position.set(-1.7, 2.45, 1.1);
+    scene.add(lanternLight);
+
+    // 4. Load Diorama Model
     const loader = new GLTFLoader();
     let mixer: THREE.AnimationMixer | null = null;
     const dioramaGroup = new THREE.Group();
+    dioramaGroup.position.set(0, -0.2, 0);
     scene.add(dioramaGroup);
-    modelRef.current = dioramaGroup;
 
     loader.load(
       "/assets/diorama.glb",
@@ -86,7 +80,6 @@ export const Diorama3D: React.FC<Diorama3DProps> = ({
 
         dioramaGroup.add(model);
 
-        // Play animations (6-second seamless loop from Blender)
         if (gltf.animations && gltf.animations.length > 0) {
           mixer = new THREE.AnimationMixer(model);
           gltf.animations.forEach((clip) => {
@@ -97,9 +90,7 @@ export const Diorama3D: React.FC<Diorama3DProps> = ({
         setLoaded(true);
       },
       undefined,
-      (error) => {
-        console.warn("Could not load diorama.glb, using fallback scene:", error);
-      }
+      (err) => console.warn("Error loading diorama:", err)
     );
 
     // 5. Mouse Parallax Orbit
@@ -110,8 +101,8 @@ export const Diorama3D: React.FC<Diorama3DProps> = ({
       const rect = container.getBoundingClientRect();
       const x = ((e.clientX - rect.left) / rect.width - 0.5) * 2;
       const y = ((e.clientY - rect.top) / rect.height - 0.5) * 2;
-      targetRotY = x * 0.25;
-      targetRotX = -y * 0.15;
+      targetRotY = x * 0.35;
+      targetRotX = -y * 0.20;
     };
 
     window.addEventListener("mousemove", handleMouseMove);
@@ -129,18 +120,18 @@ export const Diorama3D: React.FC<Diorama3DProps> = ({
       if (mixer) mixer.update(delta);
 
       // Smooth camera orbit
-      dioramaGroup.rotation.y += (targetRotY - dioramaGroup.rotation.y) * 0.05;
-      dioramaGroup.rotation.x += (targetRotX - dioramaGroup.rotation.x) * 0.05;
+      dioramaGroup.rotation.y += (targetRotY - dioramaGroup.rotation.y) * 0.06;
+      dioramaGroup.rotation.x += (targetRotX - dioramaGroup.rotation.x) * 0.06;
 
       // Dynamic Highlighting pulse
       if (dioramaGroup) {
         const time = currentTime / 1000;
         dioramaGroup.traverse((child) => {
           const name = child.name.toUpperCase();
-          if (highlight === "food" && (name.includes("FOOD") || name.includes("FORK") || name.includes("LEFT"))) {
-            child.scale.setScalar(1.0 + Math.sin(time * 6) * 0.06);
+          if (highlight === "food" && (name.includes("FOOD") || name.includes("FORK") || name.includes("LEFT") || name.includes("PASTA"))) {
+            child.scale.setScalar(1.0 + Math.sin(time * 8) * 0.08);
           } else if (highlight === "drink" && (name.includes("WINE") || name.includes("BEER") || name.includes("RIGHT"))) {
-            child.scale.setScalar(1.0 + Math.sin(time * 6) * 0.06);
+            child.scale.setScalar(1.0 + Math.sin(time * 8) * 0.08);
           } else {
             child.scale.setScalar(1.0);
           }
@@ -155,11 +146,7 @@ export const Diorama3D: React.FC<Diorama3DProps> = ({
     const handleResize = () => {
       if (!container) return;
       const newWidth = container.clientWidth || 380;
-      const newAspect = newWidth / height;
-      camera.left = (-frustumSize * newAspect) / 2;
-      camera.right = (frustumSize * newAspect) / 2;
-      camera.top = frustumSize / 2;
-      camera.bottom = -frustumSize / 2;
+      camera.aspect = newWidth / height;
       camera.updateProjectionMatrix();
       renderer.setSize(newWidth, height);
     };
@@ -184,8 +171,8 @@ export const Diorama3D: React.FC<Diorama3DProps> = ({
       style={{ height }}
     >
       {!loaded && (
-        <div className="absolute inset-0 flex items-center justify-center font-mono text-xs text-black/40">
-          Loading 3D Diorama...
+        <div className="absolute inset-0 flex items-center justify-center font-mono text-xs text-black/40 animate-pulse">
+          Crafting 3D Date World...
         </div>
       )}
     </div>

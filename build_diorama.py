@@ -8,13 +8,18 @@ bpy.ops.wm.read_factory_settings(use_empty=True)
 scene = bpy.context.scene
 scene.render.fps = 24
 scene.frame_start = 1
-scene.frame_end = 144  # 6-second loop at 24fps
+scene.frame_end = 144  # 6-second seamless loop
 
 def get_active():
     return bpy.context.view_layer.objects.active
 
-# 1. Color Palette Materials
-def create_mat(name, color, roughness=0.35, metallic=0.0):
+def apply_smooth(obj):
+    if hasattr(obj.data, 'polygons'):
+        for p in obj.data.polygons:
+            p.use_smooth = True
+
+# 1. High-End Stylized Toy / Clay Materials
+def create_mat(name, color, roughness=0.25, metallic=0.0, transmission=0.0, emission=None, emission_strength=1.0):
     mat = bpy.data.materials.new(name=name)
     mat.use_nodes = True
     bsdf = mat.node_tree.nodes.get("Principled BSDF")
@@ -22,18 +27,42 @@ def create_mat(name, color, roughness=0.35, metallic=0.0):
         bsdf.inputs['Base Color'].default_value = color
         bsdf.inputs['Roughness'].default_value = roughness
         bsdf.inputs['Metallic'].default_value = metallic
+        if 'Transmission Weight' in bsdf.inputs:
+            bsdf.inputs['Transmission Weight'].default_value = transmission
+        elif 'Transmission' in bsdf.inputs:
+            bsdf.inputs['Transmission'].default_value = transmission
+        if emission and 'Emission Color' in bsdf.inputs:
+            bsdf.inputs['Emission Color'].default_value = emission
+            if 'Emission Strength' in bsdf.inputs:
+                bsdf.inputs['Emission Strength'].default_value = emission_strength
     return mat
 
-mat_cream = create_mat("Mat_Cream", (0.98, 0.96, 0.88, 1.0))
-mat_yellow = create_mat("Mat_Yellow", (1.0, 0.85, 0.05, 1.0))
-mat_blue = create_mat("Mat_Blue", (0.1, 0.35, 0.95, 1.0))
-mat_orange = create_mat("Mat_Orange", (1.0, 0.42, 0.05, 1.0))
-mat_red = create_mat("Mat_Red", (0.92, 0.15, 0.2, 1.0))
-mat_green = create_mat("Mat_Green", (0.1, 0.75, 0.35, 1.0))
-mat_pink = create_mat("Mat_Pink", (1.0, 0.3, 0.55, 1.0))
-mat_black = create_mat("Mat_Black", (0.08, 0.08, 0.1, 1.0), roughness=0.6)
-mat_white = create_mat("Mat_White", (0.96, 0.96, 0.96, 1.0))
-mat_gold = create_mat("Mat_Gold", (0.95, 0.75, 0.2, 1.0), metallic=0.4)
+mat_base_terracotta = create_mat("Mat_Terracotta", (0.85, 0.45, 0.32, 1.0), roughness=0.6)
+mat_pavement = create_mat("Mat_Pavement", (0.92, 0.90, 0.84, 1.0), roughness=0.5)
+mat_curb = create_mat("Mat_Curb", (0.75, 0.72, 0.68, 1.0), roughness=0.5)
+mat_wood_table = create_mat("Mat_Wood", (0.45, 0.26, 0.15, 1.0), roughness=0.3)
+mat_brass = create_mat("Mat_Brass", (0.95, 0.78, 0.25, 1.0), roughness=0.2, metallic=0.7)
+mat_chair_red = create_mat("Mat_ChairRed", (0.88, 0.22, 0.20, 1.0), roughness=0.35)
+mat_chair_navy = create_mat("Mat_ChairNavy", (0.15, 0.30, 0.65, 1.0), roughness=0.35)
+mat_skin_warm = create_mat("Mat_SkinWarm", (0.96, 0.78, 0.65, 1.0), roughness=0.45)
+mat_skin_fair = create_mat("Mat_SkinFair", (0.98, 0.84, 0.72, 1.0), roughness=0.45)
+mat_hair_dark = create_mat("Mat_HairDark", (0.15, 0.12, 0.10, 1.0), roughness=0.5)
+mat_hair_ginger = create_mat("Mat_HairGinger", (0.85, 0.40, 0.12, 1.0), roughness=0.4)
+mat_sweater_mustard = create_mat("Mat_SweaterMustard", (0.95, 0.72, 0.10, 1.0), roughness=0.7)
+mat_sweater_coral = create_mat("Mat_SweaterCoral", (0.95, 0.35, 0.42, 1.0), roughness=0.7)
+mat_wine_glass = create_mat("Mat_Glass", (0.9, 0.95, 1.0, 0.4), roughness=0.08, transmission=0.85)
+mat_wine_red = create_mat("Mat_WineLiquid", (0.65, 0.05, 0.15, 1.0), roughness=0.1)
+mat_beer_amber = create_mat("Mat_BeerLiquid", (0.95, 0.60, 0.10, 1.0), roughness=0.15)
+mat_beer_foam = create_mat("Mat_BeerFoam", (0.98, 0.98, 0.96, 1.0), roughness=0.8)
+mat_food_plate = create_mat("Mat_Plate", (0.98, 0.98, 0.98, 1.0), roughness=0.15)
+mat_pasta_food = create_mat("Mat_Pasta", (0.95, 0.75, 0.30, 1.0), roughness=0.4)
+mat_tomato_sauce = create_mat("Mat_Tomato", (0.85, 0.18, 0.12, 1.0), roughness=0.3)
+mat_plant_green = create_mat("Mat_Greenery", (0.18, 0.65, 0.25, 1.0), roughness=0.4)
+mat_plant_dark = create_mat("Mat_DarkGreen", (0.10, 0.45, 0.18, 1.0), roughness=0.4)
+mat_lamp_black = create_mat("Mat_LampIron", (0.12, 0.12, 0.14, 1.0), roughness=0.3)
+mat_lamp_glow = create_mat("Mat_GlowLight", (1.0, 0.92, 0.65, 1.0), roughness=0.2, emission=(1.0, 0.88, 0.50, 1.0), emission_strength=4.0)
+mat_string_light = create_mat("Mat_FairyLight", (1.0, 0.95, 0.75, 1.0), emission=(1.0, 0.92, 0.65, 1.0), emission_strength=3.5)
+mat_awning_stripe = create_mat("Mat_AwningRed", (0.90, 0.20, 0.25, 1.0), roughness=0.5)
 
 def set_mat(obj, mat):
     if obj.data.materials:
@@ -41,277 +70,355 @@ def set_mat(obj, mat):
     else:
         obj.data.materials.append(mat)
 
-# 2. PLATFORM
-bpy.ops.mesh.primitive_cylinder_add(vertices=16, radius=3.2, depth=0.4, location=(0, 0, -0.2))
+# 2. PLATFORM (Rounded European Café Terrace)
+bpy.ops.mesh.primitive_cylinder_add(vertices=32, radius=2.4, depth=0.35, location=(0, 0, -0.175))
 platform = get_active()
 platform.name = "PLATFORM"
-platform.scale = (1.1, 0.95, 1.0)
-set_mat(platform, mat_cream)
+platform.scale = (1.05, 0.95, 1.0)
+apply_smooth(platform)
+set_mat(platform, mat_base_terracotta)
 
-# Sidewalk tiles on platform
-for i, pos in enumerate([(-1.8, -1.2, 0.02), (-1.2, -1.8, 0.02), (-0.4, -2.2, 0.02), (0.6, -2.1, 0.02)]):
-    bpy.ops.mesh.primitive_cube_add(size=0.45, location=pos)
-    stone = get_active()
-    stone.scale = (1.0, 0.7, 0.05)
-    stone.rotation_euler = (0, 0, i * 0.35)
-    set_mat(stone, mat_yellow if i % 2 == 0 else mat_pink)
-    stone.parent = platform
+# Cobblestone Top Surface
+bpy.ops.mesh.primitive_cylinder_add(vertices=32, radius=2.25, depth=0.08, location=(0, 0, 0.02))
+pave = get_active()
+pave.scale = (1.05, 0.95, 1.0)
+apply_smooth(pave)
+set_mat(pave, mat_pavement)
+pave.parent = platform
 
-# 3. TABLE
-bpy.ops.mesh.primitive_cylinder_add(vertices=16, radius=0.9, depth=0.08, location=(0, 0, 1.1))
+# 3. CAFÉ TABLE (Round Walnut Table with Brass Edge)
+bpy.ops.mesh.primitive_cylinder_add(vertices=24, radius=0.72, depth=0.06, location=(0, 0, 0.95))
 table_top = get_active()
 table_top.name = "TABLE"
-set_mat(table_top, mat_white)
+apply_smooth(table_top)
+set_mat(table_top, mat_wood_table)
 
-bpy.ops.mesh.primitive_cylinder_add(vertices=8, radius=0.08, depth=1.1, location=(0, 0, 0.55))
-table_leg = get_active()
-set_mat(table_leg, mat_black)
-table_leg.parent = table_top
+# Brass Ring around table
+bpy.ops.mesh.primitive_torus_add(major_radius=0.73, minor_radius=0.025, major_segments=24, minor_segments=8, location=(0, 0, 0.95))
+table_ring = get_active()
+apply_smooth(table_ring)
+set_mat(table_ring, mat_brass)
+table_ring.parent = table_top
 
-bpy.ops.mesh.primitive_cylinder_add(vertices=12, radius=0.45, depth=0.06, location=(0, 0, 0.03))
+# Table Pedestal
+bpy.ops.mesh.primitive_cylinder_add(vertices=12, radius=0.06, depth=0.9, location=(0, 0, 0.48))
+table_pedestal = get_active()
+apply_smooth(table_pedestal)
+set_mat(table_pedestal, mat_brass)
+table_pedestal.parent = table_top
+
+bpy.ops.mesh.primitive_cylinder_add(vertices=16, radius=0.36, depth=0.05, location=(0, 0, 0.04))
 table_base = get_active()
-set_mat(table_base, mat_black)
+apply_smooth(table_base)
+set_mat(table_base, mat_lamp_black)
 table_base.parent = table_top
 
-# 4. CHAIR_LEFT
-bpy.ops.mesh.primitive_cube_add(size=0.6, location=(-1.4, 0, 0.6))
+# 4. CHAIR_LEFT (Warm Red Bistro Chair)
+bpy.ops.mesh.primitive_cylinder_add(vertices=20, radius=0.32, depth=0.05, location=(-1.15, 0, 0.52))
 chair_left = get_active()
 chair_left.name = "CHAIR_LEFT"
-chair_left.scale = (0.9, 0.9, 0.1)
-chair_left.rotation_euler = (0, 0, math.radians(15))
-set_mat(chair_left, mat_yellow)
+apply_smooth(chair_left)
+set_mat(chair_left, mat_chair_red)
 
-bpy.ops.mesh.primitive_cube_add(size=0.5, location=(-1.7, 0, 1.05))
-back_l = get_active()
-back_l.scale = (0.1, 0.85, 0.9)
-back_l.rotation_euler = (0, math.radians(-10), math.radians(15))
-set_mat(back_l, mat_yellow)
-back_l.parent = chair_left
+# Rounded curved backrest
+bpy.ops.mesh.primitive_torus_add(major_radius=0.28, minor_radius=0.03, major_segments=16, minor_segments=8, location=(-1.35, 0, 0.9))
+backrest_l = get_active()
+backrest_l.rotation_euler = (math.radians(90), 0, math.radians(-15))
+apply_smooth(backrest_l)
+set_mat(backrest_l, mat_chair_red)
+backrest_l.parent = chair_left
 
-for lx, ly in [(-0.22, -0.22), (-0.22, 0.22), (0.22, -0.22), (0.22, 0.22)]:
-    bpy.ops.mesh.primitive_cylinder_add(vertices=6, radius=0.04, depth=0.6, location=(-1.4 + lx, ly, 0.3))
+for cx, cy in [(-0.18, -0.18), (-0.18, 0.18), (0.18, -0.18), (0.18, 0.18)]:
+    bpy.ops.mesh.primitive_cylinder_add(vertices=8, radius=0.025, depth=0.52, location=(-1.15 + cx, cy, 0.26))
     leg = get_active()
-    set_mat(leg, mat_black)
+    apply_smooth(leg)
+    set_mat(leg, mat_brass)
     leg.parent = chair_left
 
-# 5. CHAIR_RIGHT
-bpy.ops.mesh.primitive_cube_add(size=0.6, location=(1.4, 0, 0.6))
+# 5. CHAIR_RIGHT (Navy Bistro Chair)
+bpy.ops.mesh.primitive_cylinder_add(vertices=20, radius=0.32, depth=0.05, location=(1.15, 0, 0.52))
 chair_right = get_active()
 chair_right.name = "CHAIR_RIGHT"
-chair_right.scale = (0.9, 0.9, 0.1)
-chair_right.rotation_euler = (0, 0, math.radians(-15))
-set_mat(chair_right, mat_blue)
+apply_smooth(chair_right)
+set_mat(chair_right, mat_chair_navy)
 
-bpy.ops.mesh.primitive_cube_add(size=0.5, location=(1.7, 0, 1.05))
-back_r = get_active()
-back_r.scale = (0.1, 0.85, 0.9)
-back_r.rotation_euler = (0, math.radians(10), math.radians(-15))
-set_mat(back_r, mat_blue)
-back_r.parent = chair_right
+bpy.ops.mesh.primitive_torus_add(major_radius=0.28, minor_radius=0.03, major_segments=16, minor_segments=8, location=(1.35, 0, 0.9))
+backrest_r = get_active()
+backrest_r.rotation_euler = (math.radians(90), 0, math.radians(15))
+apply_smooth(backrest_r)
+set_mat(backrest_r, mat_chair_navy)
+backrest_r.parent = chair_right
 
-for rx, ry in [(-0.22, -0.22), (-0.22, 0.22), (0.22, -0.22), (0.22, 0.22)]:
-    bpy.ops.mesh.primitive_cylinder_add(vertices=6, radius=0.04, depth=0.6, location=(1.4 + rx, ry, 0.3))
+for cx, cy in [(-0.18, -0.18), (-0.18, 0.18), (0.18, -0.18), (0.18, 0.18)]:
+    bpy.ops.mesh.primitive_cylinder_add(vertices=8, radius=0.025, depth=0.52, location=(1.15 + cx, cy, 0.26))
     leg = get_active()
-    set_mat(leg, mat_black)
+    apply_smooth(leg)
+    set_mat(leg, mat_brass)
     leg.parent = chair_right
 
-# 6. CHARACTER_LEFT (Illustrated Character with Fork)
-bpy.ops.mesh.primitive_cylinder_add(vertices=8, radius=0.35, depth=0.8, location=(-1.35, 0, 1.05))
+# 6. CHARACTER_LEFT (Cute Pixar/Vinyl Toy Figure in Mustard Sweater)
+# Torso
+bpy.ops.mesh.primitive_uv_sphere_add(segments=16, ring_count=12, radius=0.32, location=(-1.1, 0, 0.95))
 char_left = get_active()
 char_left.name = "CHARACTER_LEFT"
-char_left.rotation_euler = (0, 0, math.radians(20))
-set_mat(char_left, mat_red)
+char_left.scale = (0.9, 1.0, 1.2)
+apply_smooth(char_left)
+set_mat(char_left, mat_sweater_mustard)
 
-bpy.ops.mesh.primitive_uv_sphere_add(segments=12, ring_count=8, radius=0.3, location=(-1.35, 0, 1.65))
+# Head
+bpy.ops.mesh.primitive_uv_sphere_add(segments=20, ring_count=14, radius=0.26, location=(-1.1, 0, 1.48))
 head_l = get_active()
 head_l.name = "HEAD_LEFT"
-set_mat(head_l, mat_cream)
+apply_smooth(head_l)
+set_mat(head_l, mat_skin_warm)
 head_l.parent = char_left
 
-bpy.ops.mesh.primitive_cone_add(vertices=8, radius1=0.32, depth=0.25, location=(-1.35, 0, 1.9))
+# Stylish Beret / Hair
+bpy.ops.mesh.primitive_cylinder_add(vertices=16, radius=0.28, depth=0.12, location=(-1.1, 0, 1.70))
 hair_l = get_active()
-set_mat(hair_l, mat_black)
+hair_l.rotation_euler = (math.radians(8), math.radians(-10), 0)
+apply_smooth(hair_l)
+set_mat(hair_l, mat_hair_dark)
 hair_l.parent = head_l
 
-bpy.ops.mesh.primitive_uv_sphere_add(segments=8, ring_count=6, radius=0.14, location=(-0.75, 0.15, 1.25))
+# Cute Blush Cheeks & Eyes
+for ey, ez in [(-0.08, 1.49), (0.08, 1.49)]:
+    bpy.ops.mesh.primitive_uv_sphere_add(segments=8, ring_count=6, radius=0.022, location=(-0.86, ey, ez))
+    eye = get_active()
+    set_mat(eye, mat_hair_dark)
+    eye.parent = head_l
+
+# Arm & Hand holding Fork
+bpy.ops.mesh.primitive_uv_sphere_add(segments=10, ring_count=8, radius=0.11, location=(-0.65, 0.12, 1.08))
 hand_l = get_active()
 hand_l.name = "HAND_LEFT"
-set_mat(hand_l, mat_cream)
+apply_smooth(hand_l)
+set_mat(hand_l, mat_skin_warm)
 hand_l.parent = char_left
 
-# FORK
-bpy.ops.mesh.primitive_cylinder_add(vertices=6, radius=0.02, depth=0.38, location=(-0.65, 0.15, 1.35))
+# FORK (Cute golden dessert/pasta fork)
+bpy.ops.mesh.primitive_cylinder_add(vertices=8, radius=0.018, depth=0.32, location=(-0.56, 0.12, 1.16))
 fork = get_active()
 fork.name = "FORK"
-fork.rotation_euler = (math.radians(25), math.radians(-30), 0)
-set_mat(fork, mat_gold)
+fork.rotation_euler = (math.radians(35), math.radians(-25), 0)
+apply_smooth(fork)
+set_mat(fork, mat_brass)
 fork.parent = hand_l
 
-# 7. CHARACTER_RIGHT (Illustrated Character with Drink)
-bpy.ops.mesh.primitive_cone_add(vertices=8, radius1=0.4, depth=0.85, location=(1.35, 0, 1.05))
+# 7. CHARACTER_RIGHT (Cute Pixar/Vinyl Toy Figure in Coral Sweater)
+# Torso
+bpy.ops.mesh.primitive_uv_sphere_add(segments=16, ring_count=12, radius=0.32, location=(1.1, 0, 0.95))
 char_right = get_active()
 char_right.name = "CHARACTER_RIGHT"
-char_right.rotation_euler = (0, 0, math.radians(-20))
-set_mat(char_right, mat_green)
+char_right.scale = (0.9, 1.0, 1.2)
+apply_smooth(char_right)
+set_mat(char_right, mat_sweater_coral)
 
-bpy.ops.mesh.primitive_cube_add(size=0.48, location=(1.35, 0, 1.65))
+# Head
+bpy.ops.mesh.primitive_uv_sphere_add(segments=20, ring_count=14, radius=0.26, location=(1.1, 0, 1.48))
 head_r = get_active()
 head_r.name = "HEAD_RIGHT"
-set_mat(head_r, mat_cream)
+apply_smooth(head_r)
+set_mat(head_r, mat_skin_fair)
 head_r.parent = char_right
 
-bpy.ops.mesh.primitive_uv_sphere_add(segments=10, ring_count=8, radius=0.32, location=(1.35, 0, 1.85))
+# Cute Bob Haircut
+bpy.ops.mesh.primitive_uv_sphere_add(segments=16, ring_count=12, radius=0.30, location=(1.1, 0, 1.62))
 hair_r = get_active()
-hair_r.scale = (1.1, 1.1, 0.6)
-set_mat(hair_r, mat_orange)
+hair_r.scale = (1.05, 1.05, 0.75)
+apply_smooth(hair_r)
+set_mat(hair_r, mat_hair_ginger)
 hair_r.parent = head_r
 
-bpy.ops.mesh.primitive_uv_sphere_add(segments=8, ring_count=6, radius=0.14, location=(0.75, 0.1, 1.3))
+# Eyes
+for ey, ez in [(-0.08, 1.49), (0.08, 1.49)]:
+    bpy.ops.mesh.primitive_uv_sphere_add(segments=8, ring_count=6, radius=0.022, location=(0.86, ey, ez))
+    eye = get_active()
+    set_mat(eye, mat_hair_dark)
+    eye.parent = head_r
+
+# Arm & Hand raising Wine Glass
+bpy.ops.mesh.primitive_uv_sphere_add(segments=10, ring_count=8, radius=0.11, location=(0.65, 0.10, 1.15))
 hand_r = get_active()
 hand_r.name = "HAND_RIGHT"
-set_mat(hand_r, mat_cream)
+apply_smooth(hand_r)
+set_mat(hand_r, mat_skin_fair)
 hand_r.parent = char_right
 
-# 8. FOOD_PLATE
-bpy.ops.mesh.primitive_cylinder_add(vertices=16, radius=0.36, depth=0.04, location=(-0.35, 0.05, 1.16))
-plate = get_active()
-plate.name = "FOOD_PLATE"
-set_mat(plate, mat_cream)
-
-bpy.ops.mesh.primitive_cone_add(vertices=3, radius1=0.22, depth=0.06, location=(-0.35, 0.05, 1.21))
-food_item = get_active()
-food_item.rotation_euler = (0, 0, math.radians(45))
-set_mat(food_item, mat_orange)
-food_item.parent = plate
-
-for fx, fy in [(-0.38, 0.12), (-0.3, -0.02), (-0.42, -0.01)]:
-    bpy.ops.mesh.primitive_uv_sphere_add(segments=6, ring_count=4, radius=0.05, location=(fx, fy, 1.23))
-    dot = get_active()
-    set_mat(dot, mat_red)
-    dot.parent = plate
-
-# 9. WINE_GLASS
-bpy.ops.mesh.primitive_cylinder_add(vertices=10, radius=0.12, depth=0.22, location=(0.65, 0.12, 1.42))
+# WINE_GLASS (Stemware with ruby wine liquid)
+bpy.ops.mesh.primitive_cylinder_add(vertices=16, radius=0.09, depth=0.18, location=(0.56, 0.12, 1.28))
 wine_glass = get_active()
 wine_glass.name = "WINE_GLASS"
-set_mat(wine_glass, mat_pink)
+apply_smooth(wine_glass)
+set_mat(wine_glass, mat_wine_glass)
 wine_glass.parent = hand_r
 
-# 10. BEER_GLASS
-bpy.ops.mesh.primitive_cylinder_add(vertices=10, radius=0.14, depth=0.32, location=(0.35, -0.15, 1.3))
+bpy.ops.mesh.primitive_cylinder_add(vertices=12, radius=0.075, depth=0.10, location=(0.56, 0.12, 1.25))
+wine_liquid = get_active()
+apply_smooth(wine_liquid)
+set_mat(wine_liquid, mat_wine_red)
+wine_liquid.parent = wine_glass
+
+# 8. FOOD_PLATE (Ceramic Plate with Appetizing Pasta & Sauce)
+bpy.ops.mesh.primitive_cylinder_add(vertices=24, radius=0.30, depth=0.035, location=(-0.25, 0.05, 1.00))
+plate = get_active()
+plate.name = "FOOD_PLATE"
+apply_smooth(plate)
+set_mat(plate, mat_food_plate)
+
+# Swirled Pasta Nest
+bpy.ops.mesh.primitive_torus_add(major_radius=0.14, minor_radius=0.06, major_segments=16, minor_segments=8, location=(-0.25, 0.05, 1.04))
+pasta = get_active()
+apply_smooth(pasta)
+set_mat(pasta, mat_pasta_food)
+pasta.parent = plate
+
+# Tomato & Basil garnish
+bpy.ops.mesh.primitive_uv_sphere_add(segments=8, ring_count=6, radius=0.045, location=(-0.25, 0.05, 1.11))
+sauce_dollop = get_active()
+set_mat(sauce_dollop, mat_tomato_sauce)
+sauce_dollop.parent = plate
+
+# 9. BEER_GLASS (Tall Frosty Pint on Table)
+bpy.ops.mesh.primitive_cylinder_add(vertices=16, radius=0.10, depth=0.28, location=(0.28, -0.15, 1.12))
 beer_glass = get_active()
 beer_glass.name = "BEER_GLASS"
-set_mat(beer_glass, mat_yellow)
+apply_smooth(beer_glass)
+set_mat(beer_glass, mat_beer_amber)
 
-bpy.ops.mesh.primitive_cylinder_add(vertices=10, radius=0.15, depth=0.08, location=(0.35, -0.15, 1.48))
-foam = get_active()
-set_mat(foam, mat_white)
-foam.parent = beer_glass
+# Foamy top
+bpy.ops.mesh.primitive_uv_sphere_add(segments=12, ring_count=8, radius=0.11, location=(0.28, -0.15, 1.26))
+beer_foam = get_active()
+beer_foam.scale = (1.0, 1.0, 0.45)
+apply_smooth(beer_foam)
+set_mat(beer_foam, mat_beer_foam)
+beer_foam.parent = beer_glass
 
-# 11. FLOWER in mini vase
-bpy.ops.mesh.primitive_cylinder_add(vertices=8, radius=0.1, depth=0.2, location=(0, -0.22, 1.24))
+# 10. FLOWER (Tiny ceramic vase with cute blossom)
+bpy.ops.mesh.primitive_cylinder_add(vertices=12, radius=0.07, depth=0.18, location=(0.0, -0.22, 1.07))
 vase = get_active()
-set_mat(vase, mat_black)
+apply_smooth(vase)
+set_mat(vase, mat_chair_navy)
 
-bpy.ops.mesh.primitive_uv_sphere_add(segments=8, ring_count=6, radius=0.12, location=(0, -0.22, 1.42))
+bpy.ops.mesh.primitive_uv_sphere_add(segments=10, ring_count=8, radius=0.09, location=(0.0, -0.22, 1.22))
 flower = get_active()
 flower.name = "FLOWER"
-set_mat(flower, mat_red)
+apply_smooth(flower)
+set_mat(flower, mat_sweater_coral)
 flower.parent = vase
 
-# 12. LAMP
-bpy.ops.mesh.primitive_cylinder_add(vertices=8, radius=0.06, depth=2.8, location=(-2.2, 1.2, 1.4))
+# 11. STREET LAMP (Glowing Parisian Lantern)
+bpy.ops.mesh.primitive_cylinder_add(vertices=10, radius=0.04, depth=2.4, location=(-1.7, 1.1, 1.2))
 lamp_post = get_active()
 lamp_post.name = "LAMP"
-set_mat(lamp_post, mat_black)
+apply_smooth(lamp_post)
+set_mat(lamp_post, mat_lamp_black)
 
-bpy.ops.mesh.primitive_cube_add(size=0.45, location=(-2.2, 1.2, 2.85))
-lamp_head = get_active()
-lamp_head.rotation_euler = (0, 0, math.radians(45))
-set_mat(lamp_head, mat_yellow)
-lamp_head.parent = lamp_post
+# Lantern Housing
+bpy.ops.mesh.primitive_cylinder_add(vertices=6, radius=0.22, depth=0.35, location=(-1.7, 1.1, 2.45))
+lantern = get_active()
+apply_smooth(lantern)
+set_mat(lantern, mat_lamp_black)
+lantern.parent = lamp_post
 
-# 13. PLANT
-bpy.ops.mesh.primitive_cylinder_add(vertices=10, radius=0.35, depth=0.5, location=(2.1, 1.2, 0.25))
+# Glowing Bulb
+bpy.ops.mesh.primitive_uv_sphere_add(segments=12, ring_count=8, radius=0.12, location=(-1.7, 1.1, 2.45))
+bulb = get_active()
+set_mat(bulb, mat_lamp_glow)
+bulb.parent = lantern
+
+# 12. PLANT (Terracotta Planter with Stylized Fiddle Leaves)
+bpy.ops.mesh.primitive_cylinder_add(vertices=16, radius=0.28, depth=0.42, location=(1.6, 1.1, 0.21))
 pot = get_active()
 pot.name = "PLANT"
-set_mat(pot, mat_pink)
+apply_smooth(pot)
+set_mat(pot, mat_base_terracotta)
 
-bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=1, radius=0.45, location=(2.1, 1.2, 0.75))
-bush = get_active()
-set_mat(bush, mat_green)
-bush.parent = pot
+# Lush Green Spherical Bushes
+for px, py, pz, r in [(0, 0, 0.38, 0.32), (-0.08, 0.08, 0.55, 0.24), (0.08, -0.06, 0.60, 0.22)]:
+    bpy.ops.mesh.primitive_uv_sphere_add(segments=12, ring_count=10, radius=r, location=(1.6 + px, 1.1 + py, 0.21 + pz))
+    leaf_ball = get_active()
+    apply_smooth(leaf_ball)
+    set_mat(leaf_ball, mat_plant_green)
+    leaf_ball.parent = pot
 
-# 14. ABSTRACT TOYS
-bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=1, radius=0.22, location=(0, 2.0, 2.2))
-geo_toy1 = get_active()
-geo_toy1.name = "GEO_TOY"
-set_mat(geo_toy1, mat_blue)
+# 13. WARM FAIRY LIGHTS STRING OVERHEAD
+for i, t in enumerate([-1.2, -0.6, 0.0, 0.6, 1.2]):
+    h = 2.15 - (t * t) * 0.12
+    bpy.ops.mesh.primitive_uv_sphere_add(segments=8, ring_count=6, radius=0.045, location=(t, 0.1, h))
+    fairy = get_active()
+    set_mat(fairy, mat_string_light)
 
-bpy.ops.mesh.primitive_torus_add(major_radius=0.25, minor_radius=0.06, location=(-1.2, -1.8, 1.8))
-geo_toy2 = get_active()
-set_mat(geo_toy2, mat_orange)
-
-# 15. CAMERA & LIGHTS
+# 14. CAMERA & LIGHTS (Orthographic 3/4 Elevated View, Perfectly Centered)
 cam_data = bpy.data.cameras.new("OrthoCam")
 cam_data.type = 'ORTHO'
-cam_data.ortho_scale = 7.2
+cam_data.ortho_scale = 5.2
 cam_obj = bpy.data.objects.new("Camera", cam_data)
 scene.collection.objects.link(cam_obj)
 scene.camera = cam_obj
 
 cam_pivot = bpy.data.objects.new("Camera_Pivot", None)
 scene.collection.objects.link(cam_pivot)
-cam_pivot.location = (0, 0, 0.9)
+cam_pivot.location = (0, 0, 1.1)
 
-cam_obj.location = (0, -8.0, 6.0)
-cam_obj.rotation_euler = (math.radians(55), 0, 0)
+cam_obj.location = (0, -6.5, 4.8)
+cam_obj.rotation_euler = (math.radians(56), 0, 0)
 cam_obj.parent = cam_pivot
 
-# Sun Light
-light_data = bpy.data.lights.new("Sun", 'SUN')
-light_data.energy = 4.0
-light_obj = bpy.data.objects.new("SunLight", light_data)
-light_obj.location = (4.0, -3.0, 7.0)
-light_obj.rotation_euler = (math.radians(45), math.radians(20), math.radians(-30))
-scene.collection.objects.link(light_obj)
+# Sunlight (Warm Golden Hour)
+sun_data = bpy.data.lights.new("Sun", 'SUN')
+sun_data.energy = 5.0
+sun_data.color = (1.0, 0.95, 0.85)
+sun_obj = bpy.data.objects.new("SunLight", sun_data)
+sun_obj.location = (3.5, -4.0, 6.0)
+sun_obj.rotation_euler = (math.radians(48), math.radians(22), math.radians(-28))
+scene.collection.objects.link(sun_obj)
 
-# Fill Light
+# Soft Blue Sky Fill
 fill_data = bpy.data.lights.new("Fill", 'POINT')
-fill_data.energy = 80.0
+fill_data.energy = 120.0
+fill_data.color = (0.75, 0.88, 1.0)
 fill_obj = bpy.data.objects.new("FillLight", fill_data)
-fill_obj.location = (-4.0, -4.0, 4.0)
+fill_obj.location = (-3.5, -3.5, 3.5)
 scene.collection.objects.link(fill_obj)
 
-# 16. ANIMATION LOOP (144 frames)
+# 15. SEAMLESS 6-SECOND ANIMATION LOOP (144 frames @ 24fps)
 head_l.animation_data_create()
 head_l.rotation_euler = (0, 0, 0)
 head_l.keyframe_insert(data_path="rotation_euler", frame=1)
-head_l.rotation_euler = (math.radians(8), 0, math.radians(5))
+head_l.rotation_euler = (math.radians(6), 0, math.radians(4))
 head_l.keyframe_insert(data_path="rotation_euler", frame=72)
 head_l.rotation_euler = (0, 0, 0)
 head_l.keyframe_insert(data_path="rotation_euler", frame=144)
 
 hand_l.animation_data_create()
-hand_l.location = (-0.75, 0.15, 1.25)
+hand_l.location = (-0.65, 0.12, 1.08)
 hand_l.keyframe_insert(data_path="location", frame=1)
-hand_l.location = (-0.68, 0.12, 1.32)
+hand_l.location = (-0.58, 0.10, 1.14)
 hand_l.keyframe_insert(data_path="location", frame=72)
-hand_l.location = (-0.75, 0.15, 1.25)
+hand_l.location = (-0.65, 0.12, 1.08)
 hand_l.keyframe_insert(data_path="location", frame=144)
 
+head_r.animation_data_create()
+head_r.rotation_euler = (0, 0, 0)
+head_r.keyframe_insert(data_path="rotation_euler", frame=1)
+head_r.rotation_euler = (math.radians(-4), math.radians(3), math.radians(-5))
+head_r.keyframe_insert(data_path="rotation_euler", frame=72)
+head_r.rotation_euler = (0, 0, 0)
+head_r.keyframe_insert(data_path="rotation_euler", frame=144)
+
 hand_r.animation_data_create()
-hand_r.location = (0.75, 0.1, 1.3)
+hand_r.location = (0.65, 0.10, 1.15)
 hand_r.keyframe_insert(data_path="location", frame=1)
-hand_r.location = (0.65, 0.08, 1.48)
+hand_r.location = (0.58, 0.08, 1.28)
 hand_r.keyframe_insert(data_path="location", frame=72)
-hand_r.location = (0.75, 0.1, 1.3)
+hand_r.location = (0.65, 0.10, 1.15)
 hand_r.keyframe_insert(data_path="location", frame=144)
 
 flower.animation_data_create()
 flower.rotation_euler = (0, 0, 0)
 flower.keyframe_insert(data_path="rotation_euler", frame=1)
-flower.rotation_euler = (math.radians(6), math.radians(-4), 0)
+flower.rotation_euler = (math.radians(5), math.radians(-3), 0)
 flower.keyframe_insert(data_path="rotation_euler", frame=72)
 flower.rotation_euler = (0, 0, 0)
 flower.keyframe_insert(data_path="rotation_euler", frame=144)
@@ -319,28 +426,20 @@ flower.keyframe_insert(data_path="rotation_euler", frame=144)
 lamp_post.animation_data_create()
 lamp_post.rotation_euler = (0, 0, 0)
 lamp_post.keyframe_insert(data_path="rotation_euler", frame=1)
-lamp_post.rotation_euler = (math.radians(1.5), math.radians(-1.5), 0)
+lamp_post.rotation_euler = (math.radians(1.2), math.radians(-1.0), 0)
 lamp_post.keyframe_insert(data_path="rotation_euler", frame=72)
 lamp_post.rotation_euler = (0, 0, 0)
 lamp_post.keyframe_insert(data_path="rotation_euler", frame=144)
 
-geo_toy1.animation_data_create()
-geo_toy1.rotation_euler = (0, 0, 0)
-geo_toy1.keyframe_insert(data_path="rotation_euler", frame=1)
-geo_toy1.rotation_euler = (math.radians(180), math.radians(180), math.radians(180))
-geo_toy1.keyframe_insert(data_path="rotation_euler", frame=72)
-geo_toy1.rotation_euler = (math.radians(360), math.radians(360), math.radians(360))
-geo_toy1.keyframe_insert(data_path="rotation_euler", frame=144)
-
 cam_pivot.animation_data_create()
-cam_pivot.rotation_euler = (0, 0, math.radians(-3.5))
+cam_pivot.rotation_euler = (0, 0, math.radians(-3.0))
 cam_pivot.keyframe_insert(data_path="rotation_euler", frame=1)
-cam_pivot.rotation_euler = (0, 0, math.radians(3.5))
+cam_pivot.rotation_euler = (0, 0, math.radians(3.0))
 cam_pivot.keyframe_insert(data_path="rotation_euler", frame=72)
-cam_pivot.rotation_euler = (0, 0, math.radians(-3.5))
+cam_pivot.rotation_euler = (0, 0, math.radians(-3.0))
 cam_pivot.keyframe_insert(data_path="rotation_euler", frame=144)
 
-# 17. EXPORT GLB
+# 16. EXPORT GLB ASSET
 export_dir = "/Users/mahyar/Downloads/The Big Yes (1)/public/assets"
 os.makedirs(export_dir, exist_ok=True)
 export_path = os.path.join(export_dir, "diorama.glb")
@@ -354,4 +453,4 @@ bpy.ops.export_scene.gltf(
     export_lights=False
 )
 
-print("SUCCESSFULLY_EXPORTED_DIORAMA_GLB")
+print("SUCCESS: Stylized Pixar-style Diorama GLB exported.")
