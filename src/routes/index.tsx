@@ -3,14 +3,20 @@ import { useEffect, useMemo, useState } from "react";
 import {
   ArrowRight,
   ArrowLeft,
+  Beer,
   Check,
   Clock,
+  Coffee,
   Copy,
+  Droplets,
+  GlassWater,
   Heart,
   MapPin,
   RotateCcw,
   Share2,
   Sparkles,
+  Wine,
+  type LucideIcon,
 } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
@@ -44,17 +50,17 @@ type LocationPick = {
 const LOCATIONS: LocationPick[] = [
   // Coffee
   {
-    label: "The Barn Coffee Roasters (Mitte)",
+    label: "The Barn Coffee Roasters in Mitte",
     url: "https://www.google.com/maps/search/?api=1&query=The+Barn+Coffee+Roasters+Auguststra%C3%9Fe+58+10119+Berlin",
     category: "coffee",
   },
   {
-    label: "Bonanza Coffee (Prenzlauer Berg)",
+    label: "Bonanza Coffee in Prenzlauer Berg",
     url: "https://www.google.com/maps/search/?api=1&query=Bonanza+Coffee+Oderberger+Str.+35+10435+Berlin",
     category: "coffee",
   },
   {
-    label: "Five Elephant (Kreuzberg)",
+    label: "Five Elephant in Kreuzberg",
     url: "https://www.google.com/maps/search/?api=1&query=Five+Elephant+Reichenberger+Str.+101+10999+Berlin",
     category: "coffee",
   },
@@ -65,12 +71,12 @@ const LOCATIONS: LocationPick[] = [
     category: "beer",
   },
   {
-    label: "Café am Neuen See (Lakeside Beer Garden)",
+    label: "Cafe am Neuen See Lakeside Beer Garden",
     url: "https://www.google.com/maps/search/?api=1&query=Caf%C3%A9+am+Neuen+See+Lichtensteinallee+2+10787+Berlin",
     category: "beer",
   },
   {
-    label: "Prater Garten (Oldest Beer Garden in Berlin)",
+    label: "Prater Garten Oldest Beer Garden in Berlin",
     url: "https://www.google.com/maps/search/?api=1&query=Prater+Garten+Kastanienallee+7+10435+Berlin",
     category: "beer",
   },
@@ -86,35 +92,40 @@ const LOCATIONS: LocationPick[] = [
     category: "wine",
   },
   {
-    label: "Rutz Weinbar (Mitte)",
+    label: "Rutz Weinbar in Mitte",
     url: "https://www.google.com/maps/search/?api=1&query=Rutz+Weinbar+Chausseestra%C3%9Fe+8+10115+Berlin",
     category: "wine",
   },
   // Cocktail
   {
-    label: "Buck & Breck (Craft Cocktail Bar)",
+    label: "Buck and Breck Craft Cocktail Bar",
     url: "https://www.google.com/maps/search/?api=1&query=Buck+and+Breck+Brunnenstra%C3%9Fe+177+10119+Berlin",
     category: "cocktail",
   },
   {
-    label: "Velvet Bar (Candlelit Classics)",
+    label: "Velvet Bar Candlelit Classics",
     url: "https://www.google.com/maps/search/?api=1&query=Velvet+Bar+Oranienstra%C3%9Fe+2+10999+Berlin",
     category: "cocktail",
   },
   {
-    label: "Ora Berlin (Hidden Gem Cocktails)",
+    label: "Ora Berlin Hidden Gem Cocktails",
     url: "https://www.google.com/maps/search/?api=1&query=Ora+Berlin+Oranienstra%C3%9Fe+168+10999+Berlin",
     category: "cocktail",
   },
-  // Water / non-alcoholic
+  // Water at parks
   {
-    label: "Café CK (Cozy Non-Alcoholic Spot)",
-    url: "https://www.google.com/maps/search/?api=1&query=Caf%C3%A9+CK+Maybachufer+29+12047+Berlin",
+    label: "Tempelhofer Feld the old runway turned park",
+    url: "https://www.google.com/maps/search/?api=1&query=Tempelhofer+Feld+Berlin",
     category: "water",
   },
   {
-    label: "Roamers (Brunch & Drinks, Neukölln)",
-    url: "https://www.google.com/maps/search/?api=1&query=Roamers+Pannierstra%C3%9Fe+64+12047+Berlin",
+    label: "Volkspark Friedrichshain with a bottle of tap water",
+    url: "https://www.google.com/maps/search/?api=1&query=Volkspark+Friedrichshain+Berlin",
+    category: "water",
+  },
+  {
+    label: "Treptower Park with spectacular river views and zero alcohol",
+    url: "https://www.google.com/maps/search/?api=1&query=Treptower+Park+Berlin",
     category: "water",
   },
 ];
@@ -123,48 +134,48 @@ const DRINK_OPTIONS: {
   id: NonNullable<DrinkPick>;
   label: string;
   sub: string;
-  emoji: string;
+  Icon: LucideIcon;
   note: string;
   color: string;
 }[] = [
   {
     id: "coffee",
     label: "Coffee",
-    sub: "A quiet corner, a good flat white, and an excuse to talk for hours",
-    emoji: "☕",
-    note: "Low-key & high-quality",
+    sub: "A quiet corner, a good flat white, and an excuse to talk for three hours straight",
+    Icon: Coffee,
+    note: "Low key and absolutely devastating",
     color: "bg-amber-100 text-amber-900",
   },
   {
     id: "beer",
     label: "Beer",
-    sub: "Cold, crisp, casual Berlin canal-side energy",
-    emoji: "🍺",
-    note: "Honest & refreshing",
+    sub: "Cold, crisp, and the only truly honest drink in Berlin",
+    Icon: Beer,
+    note: "No pretense whatsoever",
     color: "bg-yellow-100 text-yellow-900",
   },
   {
     id: "wine",
     label: "Wine",
-    sub: "A velvety red or crisp chilled white in a cozy corner",
-    emoji: "🍷",
-    note: "Classy & unhurried",
+    sub: "A glass of something that makes both of us seem significantly more interesting",
+    Icon: Wine,
+    note: "Classy until the second glass",
     color: "bg-purple-100 text-purple-900",
   },
   {
     id: "cocktail",
     label: "Cocktail",
-    sub: "Something clever, stirred not shaken, in a dimly lit bar",
-    emoji: "🍹",
-    note: "Sophisticated & fun",
+    sub: "Something clever in a dimly lit room where we can pretend to be sophisticated adults",
+    Icon: GlassWater,
+    note: "Sophisticated until it is not",
     color: "bg-pink-100 text-pink-900",
   },
   {
     id: "water",
     label: "Water",
-    sub: "Sparkling, still, or whatever — the vibe matters more anyway",
-    emoji: "💧",
-    note: "Bold & hydrated",
+    sub: "We sit on a park bench, watch the joggers go by, and question all of our life choices together",
+    Icon: Droplets,
+    note: "Chaotic good energy and I love it",
     color: "bg-sky-100 text-sky-900",
   },
 ];
@@ -353,7 +364,7 @@ function DatingApp() {
 
               {noPos.n > 2 && (
                 <p className="text-center font-handwriting text-lg text-red-600 font-bold -rotate-1">
-                  * the "no" button is running away. Take the hint.
+                  the no button is running away. Take the hint.
                 </p>
               )}
             </div>
@@ -435,7 +446,7 @@ function DatingApp() {
               <div className="border border-black/20 rounded-lg p-3 font-mono text-xs space-y-1 bg-yellow-50">
                 <div className="flex justify-between">
                   <span>Cause of death:</span>
-                  <span className="font-bold text-red-600">"no thanks"</span>
+                  <span className="font-bold text-red-600">no thanks</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Recovery time:</span>
@@ -457,14 +468,14 @@ function DatingApp() {
           <div className="enter-fade space-y-5">
             <div>
               <span className="font-mono text-xs text-blue-900 font-bold uppercase tracking-wider">
-                STEP 01 / 02: THE DRINK
+                STEP 01 of 02: THE DRINK
               </span>
               <h2 className="font-heading text-3xl tracking-tight text-black mt-1">
                 What are we <br />
                 <span className="font-serif-italic text-4xl text-blue-800">having?</span>
               </h2>
               <p className="font-handwriting text-xl text-black/70 mt-0.5 -rotate-1">
-                pick one. I will find the perfect spot.
+                pick one. I will find the perfect spot for it.
               </p>
             </div>
 
@@ -477,7 +488,7 @@ function DatingApp() {
             </div>
 
             <div className="grid gap-3">
-              {DRINK_OPTIONS.map(({ id, label, sub, emoji, note, color }, idx) => {
+              {DRINK_OPTIONS.map(({ id, label, sub, Icon, note, color }, idx) => {
                 const selected = pick === id;
                 return (
                   <TiltCard
@@ -489,11 +500,11 @@ function DatingApp() {
                     <div className="flex items-start gap-3.5">
                       <div
                         className={cn(
-                          "p-3 rounded-lg border-2 border-black shadow-sm text-xl leading-none",
+                          "p-3 rounded-lg border-2 border-black shadow-sm",
                           selected ? "bg-yellow-300 text-black" : color,
                         )}
                       >
-                        {emoji}
+                        <Icon size={22} />
                       </div>
                       <div className="flex-1">
                         <div className="flex items-center justify-between">
@@ -502,7 +513,7 @@ function DatingApp() {
                         </div>
                         <p className="text-xs text-black/70 mt-0.5">{sub}</p>
                         <p className="font-handwriting text-sm text-blue-700 mt-1 font-semibold">
-                          * {note}
+                          {note}
                         </p>
                       </div>
                       {selected && (
@@ -521,18 +532,18 @@ function DatingApp() {
               onClick={() => { setTime(null); setStep("when"); }}
               className="btn-primary-action w-full py-3.5 text-base disabled:opacity-40 disabled:cursor-not-allowed"
             >
-              Lock Choice &amp; Pick Date <ArrowRight size={18} />
+              Lock Choice and Pick Date <ArrowRight size={18} />
             </button>
           </div>
         )}
 
-        {/* STEP 3: CALENDAR & TIME */}
+        {/* STEP 3: CALENDAR and TIME */}
         {step === "when" && (
           <div className="enter-fade space-y-5">
             <div>
               <div className="flex items-center justify-between">
                 <span className="font-mono text-xs text-green-900 font-bold uppercase tracking-wider">
-                  STEP 02 / 02: DATE &amp; TIME
+                  STEP 02 of 02: DATE and TIME
                 </span>
                 <button
                   onClick={() => setStep("drink")}
@@ -547,7 +558,7 @@ function DatingApp() {
               </h2>
               <p className="font-handwriting text-xl text-black/70 mt-0.5 -rotate-1">
                 {isCoffee
-                  ? "coffee hours: pick any day from tomorrow, between 4 PM and 7 PM."
+                  ? "coffee hours only: pick any day from tomorrow, between 4 PM and 7 PM."
                   : "select any day from tomorrow, then pick an evening time."}
               </p>
             </div>
@@ -599,7 +610,7 @@ function DatingApp() {
                 <div className="note-card p-3 bg-yellow-50 border border-yellow-300 rotate-[-0.5deg] relative mt-1">
                   <div className="tape-strip -top-2.5 left-1/2 -rotate-1" />
                   <p className="font-handwriting text-lg text-blue-800 font-semibold text-center">
-                    ✨ oh, and — dress something nice
+                    oh and dress something nice
                   </p>
                 </div>
               </div>
@@ -708,7 +719,7 @@ function DatingApp() {
                 }}
                 className="text-center w-full font-mono text-xs text-black/40 hover:text-black py-1"
               >
-                Reset / Start over
+                Reset and start over
               </button>
             </div>
           </div>
