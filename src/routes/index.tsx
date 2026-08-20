@@ -7,14 +7,11 @@ import {
   Check,
   Clock,
   Copy,
-  Flame,
   Heart,
   MapPin,
-  Pizza,
   RotateCcw,
   Share2,
   Sparkles,
-  Utensils,
   Wine,
 } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
@@ -37,36 +34,16 @@ export const Route = createFileRoute("/")({
   component: DatingApp,
 });
 
-type Step = "ask" | "sure1" | "sure2" | "rejected" | "vibe" | "food" | "drink" | "when" | "done";
-type Vibe = "food" | "drink" | null;
+type Step = "ask" | "sure1" | "sure2" | "rejected" | "vibe" | "drink" | "when" | "done";
+type Vibe = "drink" | null;
 
 type LocationPick = {
   label: string;
   url: string;
-  category: "italian" | "iranian" | "wine" | "beer";
+  category: "wine" | "beer";
 };
 
 const LOCATIONS: LocationPick[] = [
-  {
-    label: "Luna D'Oro (Italian Romance)",
-    url: "https://www.google.com/maps/search/?api=1&query=Luna+D%27Oro+Auguststraße+24+10117+Berlin",
-    category: "italian",
-  },
-  {
-    label: "Bar Milano (Italian Aperitivo & Pasta)",
-    url: "https://www.google.com/maps/search/?api=1&query=Bar+Milano+Brunnenstra%C3%9Fe+11+10119+Berlin",
-    category: "italian",
-  },
-  {
-    label: "Restaurant Teheran (Authentic Persian Kabob)",
-    url: "https://www.google.com/maps/search/?api=1&query=Restaurant+Teheran+Berlin",
-    category: "iranian",
-  },
-  {
-    label: "Persepolis (Persian Charcoal Grill)",
-    url: "https://www.google.com/maps/search/?api=1&query=Persepolis+Restaurant+Berlin",
-    category: "iranian",
-  },
   {
     label: "Pandoras Natural Wine Bar",
     url: "https://www.google.com/maps/search/?api=1&query=Pandoras+Zossener+Str.+65+10961+Berlin",
@@ -86,23 +63,6 @@ const LOCATIONS: LocationPick[] = [
     label: "Café am Neuen See (Lakeside Beer Garden)",
     url: "https://www.google.com/maps/search/?api=1&query=Caf%C3%A9+am+Neuen+See+Lichtensteinallee+2+10787+Berlin",
     category: "beer",
-  },
-];
-
-const FOOD_OPTIONS = [
-  {
-    id: "italian",
-    label: "Italian",
-    sub: "Pizza & pasta with extra parmesan and romantic candlelight",
-    Icon: Pizza,
-    note: "Extra carbs, zero regrets",
-  },
-  {
-    id: "iranian",
-    label: "Iranian Kabob",
-    sub: "Juicy saffron kabob, buttered rice, crispy tahdig, pure happiness",
-    Icon: Flame,
-    note: "The undisputed champion",
   },
 ];
 
@@ -129,7 +89,7 @@ function DatingApp() {
   const [name, setName] = useState("YOU");
   const [step, setStep] = useState<Step>("ask");
   const [vibe, setVibe] = useState<Vibe>(null);
-  const [hoverVibe, setHoverVibe] = useState<"food" | "drink" | null>(null);
+  const [hoverVibe, setHoverVibe] = useState<"drink" | null>(null);
   const [pick, setPick] = useState<string | null>(null);
   const [date, setDate] = useState<Date | undefined>();
   const [time, setTime] = useState<string | null>(null);
@@ -157,7 +117,7 @@ function DatingApp() {
     }
   }, []);
 
-  const options = vibe === "food" ? FOOD_OPTIONS : DRINK_OPTIONS;
+  const options = DRINK_OPTIONS;
   const currentPickObj = options.find((item) => item.id === pick);
   const pickLabel = currentPickObj?.label ?? "";
 
@@ -432,11 +392,11 @@ function DatingApp() {
           <div className="enter-fade space-y-5">
             <div>
               <span className="font-mono text-xs text-blue-900 font-bold uppercase tracking-wider">
-                STEP 01 / 03: THE VIBE
+                STEP 01 / 02: THE VIBE
               </span>
               <h2 className="font-heading text-3xl tracking-tight text-black mt-1">
-                Feed you, or <br />
-                <span className="font-serif-italic text-4xl text-blue-800">hydrate first?</span>
+                What are we <br />
+                <span className="font-serif-italic text-4xl text-blue-800">drinking tonight?</span>
               </h2>
               <p className="font-handwriting text-xl text-black/70 mt-0.5 -rotate-1">
                 pick one. Both options end with a great time.
@@ -477,42 +437,18 @@ function DatingApp() {
                   </div>
                 </div>
               </TiltCard>
-
-              <TiltCard
-                onClick={() => {
-                  setVibe("food");
-                  setStep("food");
-                }}
-                className="option-card-interactive group"
-              >
-                <div
-                  onMouseEnter={() => setHoverVibe("food")}
-                  onMouseLeave={() => setHoverVibe(null)}
-                  className="flex items-start gap-3.5"
-                >
-                  <div className="p-3 rounded-lg border-2 border-black bg-amber-100 text-amber-800 shadow-sm">
-                    <Utensils size={24} />
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex items-center justify-between">
-                      <span className="font-heading text-lg">Food</span>
-                      <span className="font-mono text-xs font-bold text-black/40">02</span>
-                    </div>
-                    <p className="text-xs text-black/70 mt-0.5">Italian pasta/pizza or Persian kabob feast.</p>
-                  </div>
-                </div>
-              </TiltCard>
             </div>
           </div>
         )}
 
-        {/* STEP 3: FOOD OR DRINK SPECIFIC CHOICE */}
-        {(step === "food" || step === "drink") && (
+
+        {/* STEP 3: DRINK SPECIFIC CHOICE */}
+        {step === "drink" && (
           <div className="enter-fade space-y-5">
             <div>
               <div className="flex items-center justify-between">
                 <span className="font-mono text-xs text-blue-900 font-bold uppercase tracking-wider">
-                  STEP 02 / 03: CUISINE & DRINK
+                  STEP 02 / 02: DRINK
                 </span>
                 <button
                   onClick={() => setStep("vibe")}
@@ -522,29 +458,18 @@ function DatingApp() {
                 </button>
               </div>
               <h2 className="font-heading text-3xl tracking-tight text-black mt-1">
-                {step === "food" ? (
-                  <>
-                    Choose your <br />
-                    <span className="font-serif-italic text-4xl text-amber-800">dinner preference</span>
-                  </>
-                ) : (
-                  <>
-                    Choose your <br />
-                    <span className="font-serif-italic text-4xl text-purple-800">drink preference</span>
-                  </>
-                )}
+                Choose your <br />
+                <span className="font-serif-italic text-4xl text-purple-800">drink preference</span>
               </h2>
               <p className="font-handwriting text-xl text-black/70 mt-0.5 -rotate-1">
-                {step === "food"
-                  ? "Italian romance or Persian kabob perfection."
-                  : "Classy wine or cold honest beer."}
+                Classy wine or cold honest beer.
               </p>
             </div>
 
-            {/* 3D Interactive Sketches for Food / Drink */}
+            {/* 3D Interactive Sketches for Drink */}
             <div className="note-card p-1 bg-white/70 backdrop-blur-xs relative overflow-hidden">
               <div className="tape-strip -top-2 left-8 -rotate-2" />
-              <Sketch3DCanvas type={step === "food" ? "food" : "drink"} height={140} />
+              <Sketch3DCanvas type="drink" height={140} />
               <p className="text-center font-mono text-[10px] uppercase text-black/40 pb-1">
                 [ Interactive 3D Wireframe Sketch ]
               </p>
@@ -609,7 +534,7 @@ function DatingApp() {
                   STEP 03 / 03: DATE & TIME
                 </span>
                 <button
-                  onClick={() => setStep(vibe === "food" ? "food" : "drink")}
+                  onClick={() => setStep("drink")}
                   className="text-xs font-mono font-bold flex items-center gap-1 text-black/60 hover:text-black"
                 >
                   <ArrowLeft size={14} /> Back
@@ -650,7 +575,7 @@ function DatingApp() {
               />
             </TiltCard>
 
-            {/* Time Slot Selection */}
+            {/* Time Slot Selection + Dress Message */}
             {date && (
               <div className="space-y-2.5 enter-fade">
                 <div className="flex items-center gap-1.5">
@@ -667,6 +592,14 @@ function DatingApp() {
                       {slot}
                     </button>
                   ))}
+                </div>
+
+                {/* Dress Message */}
+                <div className="note-card p-3 bg-yellow-50 border border-yellow-300 rotate-[-0.5deg] relative mt-1">
+                  <div className="tape-strip -top-2.5 left-1/2 -rotate-1" />
+                  <p className="font-handwriting text-lg text-blue-800 font-semibold text-center">
+                    ✨ oh, and — dress something nice
+                  </p>
                 </div>
               </div>
             )}
