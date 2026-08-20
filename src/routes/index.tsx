@@ -3,7 +3,6 @@ import { useEffect, useMemo, useState } from "react";
 import {
   ArrowRight,
   ArrowLeft,
-  Beer,
   Check,
   Clock,
   Copy,
@@ -12,7 +11,6 @@ import {
   RotateCcw,
   Share2,
   Sparkles,
-  Wine,
 } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
@@ -22,7 +20,7 @@ import { Diorama3D } from "@/components/3d/Diorama3D";
 import { TiltCard } from "@/components/3d/TiltCard";
 import { FloatingDoodles } from "@/components/visual/FloatingDoodles";
 
-export const Route = createFileRoute("/")({
+export const Route = createFileRoute("/")(({
   head: () => ({
     meta: [
       { title: "The Big Yes — Personal Invitation" },
@@ -32,28 +30,35 @@ export const Route = createFileRoute("/")({
     ],
   }),
   component: DatingApp,
-});
+}));
 
-type Step = "ask" | "sure1" | "sure2" | "rejected" | "vibe" | "drink" | "when" | "done";
-type Vibe = "drink" | null;
+type Step = "ask" | "sure1" | "sure2" | "rejected" | "drink" | "when" | "done";
+type DrinkPick = "coffee" | "beer" | "wine" | "cocktail" | "water" | null;
 
 type LocationPick = {
   label: string;
   url: string;
-  category: "wine" | "beer";
+  category: "coffee" | "beer" | "wine" | "cocktail" | "water";
 };
 
 const LOCATIONS: LocationPick[] = [
+  // Coffee
   {
-    label: "Pandoras Natural Wine Bar",
-    url: "https://www.google.com/maps/search/?api=1&query=Pandoras+Zossener+Str.+65+10961+Berlin",
-    category: "wine",
+    label: "The Barn Coffee Roasters (Mitte)",
+    url: "https://www.google.com/maps/search/?api=1&query=The+Barn+Coffee+Roasters+Auguststra%C3%9Fe+58+10119+Berlin",
+    category: "coffee",
   },
   {
-    label: "Windhorst Intimate Cocktail & Wine Bar",
-    url: "https://www.google.com/maps/search/?api=1&query=Windhorst+Bar+Dorotheenstra%C3%9Fe+65+10117+Berlin",
-    category: "wine",
+    label: "Bonanza Coffee (Prenzlauer Berg)",
+    url: "https://www.google.com/maps/search/?api=1&query=Bonanza+Coffee+Oderberger+Str.+35+10435+Berlin",
+    category: "coffee",
   },
+  {
+    label: "Five Elephant (Kreuzberg)",
+    url: "https://www.google.com/maps/search/?api=1&query=Five+Elephant+Reichenberger+Str.+101+10999+Berlin",
+    category: "coffee",
+  },
+  // Beer
   {
     label: "Ankerklause Waterfront Beer Bar",
     url: "https://www.google.com/maps/search/?api=1&query=Ankerklause+Kottbusser+Damm+104+10967+Berlin",
@@ -64,33 +69,113 @@ const LOCATIONS: LocationPick[] = [
     url: "https://www.google.com/maps/search/?api=1&query=Caf%C3%A9+am+Neuen+See+Lichtensteinallee+2+10787+Berlin",
     category: "beer",
   },
+  {
+    label: "Prater Garten (Oldest Beer Garden in Berlin)",
+    url: "https://www.google.com/maps/search/?api=1&query=Prater+Garten+Kastanienallee+7+10435+Berlin",
+    category: "beer",
+  },
+  // Wine
+  {
+    label: "Pandoras Natural Wine Bar",
+    url: "https://www.google.com/maps/search/?api=1&query=Pandoras+Zossener+Str.+65+10961+Berlin",
+    category: "wine",
+  },
+  {
+    label: "Windhorst Intimate Wine Bar",
+    url: "https://www.google.com/maps/search/?api=1&query=Windhorst+Bar+Dorotheenstra%C3%9Fe+65+10117+Berlin",
+    category: "wine",
+  },
+  {
+    label: "Rutz Weinbar (Mitte)",
+    url: "https://www.google.com/maps/search/?api=1&query=Rutz+Weinbar+Chausseestra%C3%9Fe+8+10115+Berlin",
+    category: "wine",
+  },
+  // Cocktail
+  {
+    label: "Buck & Breck (Craft Cocktail Bar)",
+    url: "https://www.google.com/maps/search/?api=1&query=Buck+and+Breck+Brunnenstra%C3%9Fe+177+10119+Berlin",
+    category: "cocktail",
+  },
+  {
+    label: "Velvet Bar (Candlelit Classics)",
+    url: "https://www.google.com/maps/search/?api=1&query=Velvet+Bar+Oranienstra%C3%9Fe+2+10999+Berlin",
+    category: "cocktail",
+  },
+  {
+    label: "Ora Berlin (Hidden Gem Cocktails)",
+    url: "https://www.google.com/maps/search/?api=1&query=Ora+Berlin+Oranienstra%C3%9Fe+168+10999+Berlin",
+    category: "cocktail",
+  },
+  // Water / non-alcoholic
+  {
+    label: "Café CK (Cozy Non-Alcoholic Spot)",
+    url: "https://www.google.com/maps/search/?api=1&query=Caf%C3%A9+CK+Maybachufer+29+12047+Berlin",
+    category: "water",
+  },
+  {
+    label: "Roamers (Brunch & Drinks, Neukölln)",
+    url: "https://www.google.com/maps/search/?api=1&query=Roamers+Pannierstra%C3%9Fe+64+12047+Berlin",
+    category: "water",
+  },
 ];
 
-const DRINK_OPTIONS = [
+const DRINK_OPTIONS: {
+  id: NonNullable<DrinkPick>;
+  label: string;
+  sub: string;
+  emoji: string;
+  note: string;
+  color: string;
+}[] = [
   {
-    id: "wine",
-    label: "Wine",
-    sub: "A velvety red or crisp chilled white in a cozy corner",
-    Icon: Wine,
-    note: "Classy & unhurried",
+    id: "coffee",
+    label: "Coffee",
+    sub: "A quiet corner, a good flat white, and an excuse to talk for hours",
+    emoji: "☕",
+    note: "Low-key & high-quality",
+    color: "bg-amber-100 text-amber-900",
   },
   {
     id: "beer",
     label: "Beer",
     sub: "Cold, crisp, casual Berlin canal-side energy",
-    Icon: Beer,
+    emoji: "🍺",
     note: "Honest & refreshing",
+    color: "bg-yellow-100 text-yellow-900",
+  },
+  {
+    id: "wine",
+    label: "Wine",
+    sub: "A velvety red or crisp chilled white in a cozy corner",
+    emoji: "🍷",
+    note: "Classy & unhurried",
+    color: "bg-purple-100 text-purple-900",
+  },
+  {
+    id: "cocktail",
+    label: "Cocktail",
+    sub: "Something clever, stirred not shaken, in a dimly lit bar",
+    emoji: "🍹",
+    note: "Sophisticated & fun",
+    color: "bg-pink-100 text-pink-900",
+  },
+  {
+    id: "water",
+    label: "Water",
+    sub: "Sparkling, still, or whatever — the vibe matters more anyway",
+    emoji: "💧",
+    note: "Bold & hydrated",
+    color: "bg-sky-100 text-sky-900",
   },
 ];
 
-const TIME_SLOTS = ["6:00 PM", "7:00 PM", "7:30 PM", "8:00 PM", "8:30 PM", "9:00 PM"];
+const COFFEE_TIME_SLOTS = ["4:00 PM", "4:30 PM", "5:00 PM", "5:30 PM", "6:00 PM", "6:30 PM", "7:00 PM"];
+const EVENING_TIME_SLOTS = ["6:00 PM", "7:00 PM", "7:30 PM", "8:00 PM", "8:30 PM", "9:00 PM", "9:30 PM"];
 
 function DatingApp() {
   const [name, setName] = useState("YOU");
   const [step, setStep] = useState<Step>("ask");
-  const [vibe, setVibe] = useState<Vibe>(null);
-  const [hoverVibe, setHoverVibe] = useState<"drink" | null>(null);
-  const [pick, setPick] = useState<string | null>(null);
+  const [pick, setPick] = useState<DrinkPick>(null);
   const [date, setDate] = useState<Date | undefined>();
   const [time, setTime] = useState<string | null>(null);
   const [location, setLocation] = useState<LocationPick | null>(null);
@@ -104,9 +189,7 @@ function DatingApp() {
     if (n) setName(n);
 
     if (params.get("rsvp") === "1") {
-      const v = params.get("v") as Vibe;
-      if (v) setVibe(v);
-      if (params.get("k")) setPick(params.get("k"));
+      if (params.get("k")) setPick(params.get("k") as DrinkPick);
       if (params.get("d")) setDate(new Date(params.get("d")!));
       if (params.get("t")) setTime(params.get("t"));
       if (params.get("l")) {
@@ -117,23 +200,23 @@ function DatingApp() {
     }
   }, []);
 
-  const options = DRINK_OPTIONS;
-  const currentPickObj = options.find((item) => item.id === pick);
+  const currentPickObj = DRINK_OPTIONS.find((item) => item.id === pick);
   const pickLabel = currentPickObj?.label ?? "";
+  const isCoffee = pick === "coffee";
+  const timeSlots = isCoffee ? COFFEE_TIME_SLOTS : EVENING_TIME_SLOTS;
 
   const shareUrl = useMemo(() => {
     if (typeof window === "undefined") return "";
     const p = new URLSearchParams({
       rsvp: "1",
       n: name,
-      v: vibe ?? "",
       k: pick ?? "",
       d: date?.toISOString() ?? "",
       t: time ?? "",
       l: location?.url ?? "",
     });
     return `${window.location.origin}${window.location.pathname}?${p.toString()}`;
-  }, [name, vibe, pick, date, time, location]);
+  }, [name, pick, date, time, location]);
 
   const dodge = () => {
     setNoPos({
@@ -149,8 +232,13 @@ function DatingApp() {
     window.setTimeout(() => setCopied(false), 1800);
   };
 
+  const handleDateSelect = (d: Date | undefined) => {
+    setDate(d);
+    setTime(null);
+  };
+
   const confirm = async () => {
-    if (!vibe || !pick || !date || !time || saving) return;
+    if (!pick || !date || !time || saving) return;
     setSaving(true);
 
     const filteredLocations = LOCATIONS.filter((l) => l.category === pick);
@@ -164,7 +252,7 @@ function DatingApp() {
     try {
       await submitRsvp({
         data: {
-          vibe,
+          vibe: "drink",
           choice: pickLabel,
           date_iso: date.toISOString(),
           time_slot: time,
@@ -182,10 +270,8 @@ function DatingApp() {
 
   return (
     <div className="legal-pad relative">
-      {/* Floating Parallax Doodles Layer */}
       <FloatingDoodles />
 
-      {/* Legal Pad Top Binding Header */}
       <div className="legal-pad-header z-10 relative">
         <div className="flex items-center gap-2">
           <span className="w-2.5 h-2.5 rounded-full bg-brand-yellow inline-block shadow-sm" />
@@ -199,14 +285,13 @@ function DatingApp() {
       </div>
 
       <div className="legal-pad-content z-10">
-        {/* Left red margin annotations */}
         <div className="absolute left-2 top-8 bottom-8 flex flex-col justify-between pointer-events-none select-none font-handwriting text-red-600/75 text-base leading-tight w-10 text-right pr-2">
           <span>note</span>
           <span className="rotate-[-90deg] my-auto">urgent</span>
           <span>yes</span>
         </div>
 
-        {/* STEP 1: THE FAST ASK — HAS VIDEO 1 */}
+        {/* STEP 1: ASK */}
         {step === "ask" && (
           <div className="enter-fade space-y-5">
             <div className="flex items-center justify-between border-b border-black/15 pb-2">
@@ -232,7 +317,6 @@ function DatingApp() {
               I could have sent a regular text. Instead, I built this entire handwritten legal pad webpage. That should tell you something about my commitment to a great evening.
             </p>
 
-            {/* Framed Video */}
             <div className="note-card p-2 bg-white rotate-[-1deg] my-2 relative">
               <div className="tape-strip -top-2.5 left-1/3 -rotate-2" />
               <div className="video-frame-box">
@@ -247,7 +331,7 @@ function DatingApp() {
 
             <div className="pt-2 flex flex-col gap-3">
               <button
-                onClick={() => setStep("vibe")}
+                onClick={() => setStep("drink")}
                 className="btn-primary-action w-full py-3.5 text-lg"
               >
                 YES, OBVIOUSLY <ArrowRight size={20} />
@@ -276,7 +360,7 @@ function DatingApp() {
           </div>
         )}
 
-        {/* OBJECTION 1 — WITH 3D THREE.JS PAPER AIRPLANE */}
+        {/* OBJECTION 1 */}
         {step === "sure1" && (
           <div className="enter-fade space-y-5">
             <div className="note-card p-5 bg-white space-y-4">
@@ -286,9 +370,7 @@ function DatingApp() {
                 </span>
                 <span className="font-handwriting text-lg text-black/50">are you sure?</span>
               </div>
-
               <Sketch3DCanvas type="objection" height={120} />
-
               <h2 className="font-heading text-2xl leading-tight">
                 Wait. <br />
                 <span className="font-serif-italic text-3xl text-red-600">Are you sure?</span>
@@ -297,16 +379,10 @@ function DatingApp() {
                 Because I already told my mom. She is making a scrapbook. Please do not do this to Linda.
               </p>
               <div className="space-y-2.5 pt-2">
-                <button
-                  onClick={() => setStep("vibe")}
-                  className="btn-primary-action w-full py-3 text-base"
-                >
+                <button onClick={() => setStep("drink")} className="btn-primary-action w-full py-3 text-base">
                   Fine, one date <ArrowRight size={18} />
                 </button>
-                <button
-                  onClick={() => setStep("sure2")}
-                  className="btn-secondary-action w-full py-2.5 text-xs text-black/60 font-mono uppercase"
-                >
+                <button onClick={() => setStep("sure2")} className="btn-secondary-action w-full py-2.5 text-xs text-black/60 font-mono uppercase">
                   Yes, I am sure
                 </button>
               </div>
@@ -324,9 +400,7 @@ function DatingApp() {
                 </span>
                 <span className="font-handwriting text-lg text-black/50">think carefully</span>
               </div>
-
               <Sketch3DCanvas type="objection" height={120} />
-
               <h2 className="font-heading text-2xl leading-tight">
                 Really <br />
                 <span className="font-serif-italic text-3xl text-red-600">sure sure?</span>
@@ -335,16 +409,10 @@ function DatingApp() {
                 Last check. I will accept your answer with grace and roughly seven unnecessary sighs.
               </p>
               <div className="space-y-2.5 pt-2">
-                <button
-                  onClick={() => setStep("vibe")}
-                  className="btn-primary-action w-full py-3 text-base"
-                >
+                <button onClick={() => setStep("drink")} className="btn-primary-action w-full py-3 text-base">
                   Alright, one date <ArrowRight size={18} />
                 </button>
-                <button
-                  onClick={() => setStep("rejected")}
-                  className="btn-secondary-action w-full py-2.5 text-xs text-black/60 font-mono uppercase"
-                >
+                <button onClick={() => setStep("rejected")} className="btn-secondary-action w-full py-2.5 text-xs text-black/60 font-mono uppercase">
                   Walking away
                 </button>
               </div>
@@ -375,10 +443,7 @@ function DatingApp() {
                 </div>
               </div>
               <button
-                onClick={() => {
-                  setStep("ask");
-                  setNoPos({ x: 0, y: 0, n: 0 });
-                }}
+                onClick={() => { setStep("ask"); setNoPos({ x: 0, y: 0, n: 0 }); }}
                 className="btn-primary-action w-full py-3 text-base"
               >
                 Wait, let me try again <RotateCcw size={18} />
@@ -387,96 +452,32 @@ function DatingApp() {
           </div>
         )}
 
-        {/* STEP 2: VIBE CHECK — FEATURES 3D BLENDER MINIATURE DIORAMA */}
-        {step === "vibe" && (
+        {/* STEP 2: DRINK PICKER */}
+        {step === "drink" && (
           <div className="enter-fade space-y-5">
             <div>
               <span className="font-mono text-xs text-blue-900 font-bold uppercase tracking-wider">
-                STEP 01 / 02: THE VIBE
+                STEP 01 / 02: THE DRINK
               </span>
               <h2 className="font-heading text-3xl tracking-tight text-black mt-1">
                 What are we <br />
-                <span className="font-serif-italic text-4xl text-blue-800">drinking tonight?</span>
+                <span className="font-serif-italic text-4xl text-blue-800">having?</span>
               </h2>
               <p className="font-handwriting text-xl text-black/70 mt-0.5 -rotate-1">
-                pick one. Both options end with a great time.
+                pick one. I will find the perfect spot.
               </p>
             </div>
 
-            {/* 3D Blender Diorama Scene with Interactive Highlighting */}
             <div className="note-card p-1 bg-white/75 backdrop-blur-xs relative overflow-hidden">
               <div className="tape-strip -top-2 right-8 rotate-2" />
-              <Diorama3D highlight={hoverVibe} height={230} />
+              <Diorama3D highlight={null} height={200} />
               <p className="text-center font-mono text-[10px] uppercase text-black/40 pb-1">
                 [ 3D Date Diorama &bull; Drag to Orbit ]
               </p>
             </div>
 
-            <div className="grid gap-3.5">
-              <TiltCard
-                onClick={() => {
-                  setVibe("drink");
-                  setStep("drink");
-                }}
-                className="option-card-interactive group"
-              >
-                <div
-                  onMouseEnter={() => setHoverVibe("drink")}
-                  onMouseLeave={() => setHoverVibe(null)}
-                  className="flex items-start gap-3.5"
-                >
-                  <div className="p-3 rounded-lg border-2 border-black bg-purple-100 text-purple-800 shadow-sm">
-                    <Wine size={24} />
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex items-center justify-between">
-                      <span className="font-heading text-lg">Drinks</span>
-                      <span className="font-mono text-xs font-bold text-black/40">01</span>
-                    </div>
-                    <p className="text-xs text-black/70 mt-0.5">Wine or beer in a cozy warm-lit spot.</p>
-                  </div>
-                </div>
-              </TiltCard>
-            </div>
-          </div>
-        )}
-
-
-        {/* STEP 3: DRINK SPECIFIC CHOICE */}
-        {step === "drink" && (
-          <div className="enter-fade space-y-5">
-            <div>
-              <div className="flex items-center justify-between">
-                <span className="font-mono text-xs text-blue-900 font-bold uppercase tracking-wider">
-                  STEP 02 / 02: DRINK
-                </span>
-                <button
-                  onClick={() => setStep("vibe")}
-                  className="text-xs font-mono font-bold flex items-center gap-1 text-black/60 hover:text-black"
-                >
-                  <ArrowLeft size={14} /> Change Vibe
-                </button>
-              </div>
-              <h2 className="font-heading text-3xl tracking-tight text-black mt-1">
-                Choose your <br />
-                <span className="font-serif-italic text-4xl text-purple-800">drink preference</span>
-              </h2>
-              <p className="font-handwriting text-xl text-black/70 mt-0.5 -rotate-1">
-                Classy wine or cold honest beer.
-              </p>
-            </div>
-
-            {/* 3D Interactive Sketches for Drink */}
-            <div className="note-card p-1 bg-white/70 backdrop-blur-xs relative overflow-hidden">
-              <div className="tape-strip -top-2 left-8 -rotate-2" />
-              <Sketch3DCanvas type="drink" height={140} />
-              <p className="text-center font-mono text-[10px] uppercase text-black/40 pb-1">
-                [ Interactive 3D Wireframe Sketch ]
-              </p>
-            </div>
-
             <div className="grid gap-3">
-              {options.map(({ id, label, sub, Icon, note }, idx) => {
+              {DRINK_OPTIONS.map(({ id, label, sub, emoji, note, color }, idx) => {
                 const selected = pick === id;
                 return (
                   <TiltCard
@@ -488,11 +489,11 @@ function DatingApp() {
                     <div className="flex items-start gap-3.5">
                       <div
                         className={cn(
-                          "p-3 rounded-lg border-2 border-black shadow-sm",
-                          selected ? "bg-yellow-300 text-black" : "bg-black/5 text-black/80",
+                          "p-3 rounded-lg border-2 border-black shadow-sm text-xl leading-none",
+                          selected ? "bg-yellow-300 text-black" : color,
                         )}
                       >
-                        <Icon size={22} />
+                        {emoji}
                       </div>
                       <div className="flex-1">
                         <div className="flex items-center justify-between">
@@ -517,21 +518,21 @@ function DatingApp() {
 
             <button
               disabled={!pick}
-              onClick={() => setStep("when")}
+              onClick={() => { setTime(null); setStep("when"); }}
               className="btn-primary-action w-full py-3.5 text-base disabled:opacity-40 disabled:cursor-not-allowed"
             >
-              Lock Choice & Pick Date <ArrowRight size={18} />
+              Lock Choice &amp; Pick Date <ArrowRight size={18} />
             </button>
           </div>
         )}
 
-        {/* STEP 4: CALENDAR & TIME */}
+        {/* STEP 3: CALENDAR & TIME */}
         {step === "when" && (
           <div className="enter-fade space-y-5">
             <div>
               <div className="flex items-center justify-between">
                 <span className="font-mono text-xs text-green-900 font-bold uppercase tracking-wider">
-                  STEP 03 / 03: DATE & TIME
+                  STEP 02 / 02: DATE &amp; TIME
                 </span>
                 <button
                   onClick={() => setStep("drink")}
@@ -545,11 +546,12 @@ function DatingApp() {
                 <span className="font-serif-italic text-4xl text-green-800">doing this?</span>
               </h2>
               <p className="font-handwriting text-xl text-black/70 mt-0.5 -rotate-1">
-                select any day starting tomorrow, then choose a time.
+                {isCoffee
+                  ? "coffee hours: pick any day from tomorrow, between 4 PM and 7 PM."
+                  : "select any day from tomorrow, then pick an evening time."}
               </p>
             </div>
 
-            {/* 3D Timepiece Scene */}
             <div className="note-card p-1 bg-white/70 backdrop-blur-xs relative overflow-hidden">
               <div className="tape-strip -top-2 right-12 rotate-3" />
               <Sketch3DCanvas type="when" height={130} />
@@ -558,13 +560,12 @@ function DatingApp() {
               </p>
             </div>
 
-            {/* Calendar with 3D Tilt */}
             <TiltCard maxTilt={5} className="note-card p-3.5 bg-white flex flex-col items-center relative">
               <div className="tape-strip -top-2 right-6 rotate-3" />
               <Calendar
                 mode="single"
                 selected={date}
-                onSelect={setDate}
+                onSelect={handleDateSelect}
                 disabled={(d) => {
                   const tomorrow = new Date();
                   tomorrow.setHours(0, 0, 0, 0);
@@ -575,15 +576,16 @@ function DatingApp() {
               />
             </TiltCard>
 
-            {/* Time Slot Selection + Dress Message */}
             {date && (
               <div className="space-y-2.5 enter-fade">
                 <div className="flex items-center gap-1.5">
                   <Clock size={15} className="text-black/70" />
-                  <span className="font-heading text-xs uppercase tracking-wider">Select an Evening Time</span>
+                  <span className="font-heading text-xs uppercase tracking-wider">
+                    {isCoffee ? "Select an Afternoon Time" : "Select an Evening Time"}
+                  </span>
                 </div>
-                <div className="grid grid-cols-3 gap-2">
-                  {TIME_SLOTS.map((slot) => (
+                <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
+                  {timeSlots.map((slot) => (
                     <button
                       key={slot}
                       onClick={() => setTime(slot)}
@@ -594,7 +596,6 @@ function DatingApp() {
                   ))}
                 </div>
 
-                {/* Dress Message */}
                 <div className="note-card p-3 bg-yellow-50 border border-yellow-300 rotate-[-0.5deg] relative mt-1">
                   <div className="tape-strip -top-2.5 left-1/2 -rotate-1" />
                   <p className="font-handwriting text-lg text-blue-800 font-semibold text-center">
@@ -614,12 +615,12 @@ function DatingApp() {
           </div>
         )}
 
-        {/* STEP 5: CONFIRMATION / OFFICIAL RECEIPT — HAS CELEBRATION VIDEO 2 */}
+        {/* STEP 4: CONFIRMATION RECEIPT */}
         {step === "done" && (
           <div className="enter-fade space-y-5">
             <div className="note-card p-5 bg-white space-y-4 relative">
               <div className="tape-strip -top-2.5 left-8 -rotate-3" />
-              
+
               <div className="flex items-center justify-between border-b border-black/10 pb-2">
                 <span className="status-stamp status-stamp-green">CONFIRMED</span>
                 <span className="font-mono text-xs font-bold text-black/50">DATE RECEIPT</span>
@@ -637,30 +638,22 @@ function DatingApp() {
                 </p>
               </div>
 
-              {/* Celebratory Video 2 */}
               <div className="video-frame-box my-2">
                 <video autoPlay loop muted playsInline className="w-full h-auto max-h-48 object-cover">
                   <source src="/assets/video2.mp4" type="video/mp4" />
                 </video>
               </div>
 
-              {/* Receipt Breakdown */}
               <div className="border-2 border-black rounded-lg p-3.5 bg-yellow-50/70 space-y-2.5 font-mono text-xs">
                 <div className="flex justify-between items-center pb-1.5 border-b border-black/10">
                   <span className="text-black/50 uppercase">Plan</span>
-                  <span className="font-bold">
-                    {pickLabel} {vibe === "food" ? "(Dinner)" : "(Drinks)"}
-                  </span>
+                  <span className="font-bold">{pickLabel}</span>
                 </div>
                 <div className="flex justify-between items-center pb-1.5 border-b border-black/10">
                   <span className="text-black/50 uppercase">Date</span>
                   <span className="font-bold">
                     {date
-                      ? date.toLocaleDateString("en-US", {
-                          weekday: "short",
-                          month: "short",
-                          day: "numeric",
-                        })
+                      ? date.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })
                       : "TBD"}
                   </span>
                 </div>
@@ -676,7 +669,7 @@ function DatingApp() {
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-black/50 uppercase">Dress Code</span>
-                  <span className="font-bold text-blue-900">Casual & cute</span>
+                  <span className="font-bold text-blue-900">Something nice</span>
                 </div>
               </div>
 
@@ -691,23 +684,15 @@ function DatingApp() {
                 </a>
               )}
 
-              {/* Shareable Link Box */}
               <div className="border border-black/20 rounded-lg p-3 bg-yellow-100/50 space-y-2">
                 <div className="flex items-center gap-1.5 font-mono text-[11px] text-black/70 font-semibold uppercase">
                   <Share2 size={13} /> Shareable RSVP Link
                 </div>
-                <button
-                  onClick={copy}
-                  className="btn-primary-action w-full py-2.5 text-xs font-mono font-bold"
-                >
+                <button onClick={copy} className="btn-primary-action w-full py-2.5 text-xs font-mono font-bold">
                   {copied ? (
-                    <>
-                      <Check size={14} /> Copied to Clipboard
-                    </>
+                    <><Check size={14} /> Copied to Clipboard</>
                   ) : (
-                    <>
-                      <Copy size={14} /> Copy RSVP Link
-                    </>
+                    <><Copy size={14} /> Copy RSVP Link</>
                   )}
                 </button>
               </div>
@@ -715,7 +700,6 @@ function DatingApp() {
               <button
                 onClick={() => {
                   setStep("ask");
-                  setVibe(null);
                   setPick(null);
                   setDate(undefined);
                   setTime(null);
@@ -730,7 +714,6 @@ function DatingApp() {
           </div>
         )}
 
-        {/* Legal Pad Footer */}
         <footer className="mt-auto pt-6 pb-2 text-center border-t border-black/10">
           <p className="font-mono text-[10px] uppercase tracking-wider text-black/40">
             The Big Yes &bull; Made with good intentions &bull; 2026
