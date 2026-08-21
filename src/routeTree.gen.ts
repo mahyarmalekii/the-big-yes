@@ -9,10 +9,16 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as ComposeRouteImport } from './routes/compose'
 import { Route as InboxRouteImport } from './routes/inbox'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiPublicInboxRouteImport } from './routes/api/public/inbox'
 
+const ComposeRoute = ComposeRouteImport.update({
+  id: '/compose',
+  path: '/compose',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const InboxRoute = InboxRouteImport.update({
   id: '/inbox',
   path: '/inbox',
@@ -32,30 +38,34 @@ const ApiPublicInboxRoute = ApiPublicInboxRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/inbox': typeof InboxRoute
+  '/compose': typeof ComposeRoute
   '/api/public/inbox': typeof ApiPublicInboxRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/inbox': typeof InboxRoute
+  '/compose': typeof ComposeRoute
   '/api/public/inbox': typeof ApiPublicInboxRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/inbox': typeof InboxRoute
+  '/compose': typeof ComposeRoute
   '/api/public/inbox': typeof ApiPublicInboxRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/inbox' | '/api/public/inbox'
+  fullPaths: '/' | '/inbox' | '/compose' | '/api/public/inbox'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/inbox' | '/api/public/inbox'
-  id: '__root__' | '/' | '/inbox' | '/api/public/inbox'
+  to: '/' | '/inbox' | '/compose' | '/api/public/inbox'
+  id: '__root__' | '/' | '/inbox' | '/compose' | '/api/public/inbox'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   InboxRoute: typeof InboxRoute
+  ComposeRoute: typeof ComposeRoute
   ApiPublicInboxRoute: typeof ApiPublicInboxRoute
 }
 
@@ -75,6 +85,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/compose': {
+      id: '/compose'
+      path: '/compose'
+      fullPath: '/compose'
+      preLoaderRoute: typeof ComposeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/inbox': {
       id: '/api/public/inbox'
       path: '/api/public/inbox'
@@ -88,6 +105,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   InboxRoute: InboxRoute,
+  ComposeRoute: ComposeRoute,
   ApiPublicInboxRoute: ApiPublicInboxRoute,
 }
 export const routeTree = rootRouteImport
