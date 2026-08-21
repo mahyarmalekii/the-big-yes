@@ -13,6 +13,7 @@ import { Route as ComposeRouteImport } from './routes/compose'
 import { Route as InboxRouteImport } from './routes/inbox'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiPublicInboxRouteImport } from './routes/api/public/inbox'
+import { Route as ApiPublicTelegramWebhookRouteImport } from './routes/api/public/telegram-webhook'
 
 const ComposeRoute = ComposeRouteImport.update({
   id: '/compose',
@@ -34,18 +35,25 @@ const ApiPublicInboxRoute = ApiPublicInboxRouteImport.update({
   path: '/api/public/inbox',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicTelegramWebhookRoute = ApiPublicTelegramWebhookRouteImport.update({
+  id: '/api/public/telegram-webhook',
+  path: '/api/public/telegram-webhook',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/inbox': typeof InboxRoute
   '/compose': typeof ComposeRoute
   '/api/public/inbox': typeof ApiPublicInboxRoute
+  '/api/public/telegram-webhook': typeof ApiPublicTelegramWebhookRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/inbox': typeof InboxRoute
   '/compose': typeof ComposeRoute
   '/api/public/inbox': typeof ApiPublicInboxRoute
+  '/api/public/telegram-webhook': typeof ApiPublicTelegramWebhookRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -53,13 +61,14 @@ export interface FileRoutesById {
   '/inbox': typeof InboxRoute
   '/compose': typeof ComposeRoute
   '/api/public/inbox': typeof ApiPublicInboxRoute
+  '/api/public/telegram-webhook': typeof ApiPublicTelegramWebhookRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/inbox' | '/compose' | '/api/public/inbox'
+  fullPaths: '/' | '/inbox' | '/compose' | '/api/public/inbox' | '/api/public/telegram-webhook'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/inbox' | '/compose' | '/api/public/inbox'
-  id: '__root__' | '/' | '/inbox' | '/compose' | '/api/public/inbox'
+  to: '/' | '/inbox' | '/compose' | '/api/public/inbox' | '/api/public/telegram-webhook'
+  id: '__root__' | '/' | '/inbox' | '/compose' | '/api/public/inbox' | '/api/public/telegram-webhook'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -67,6 +76,7 @@ export interface RootRouteChildren {
   InboxRoute: typeof InboxRoute
   ComposeRoute: typeof ComposeRoute
   ApiPublicInboxRoute: typeof ApiPublicInboxRoute
+  ApiPublicTelegramWebhookRoute: typeof ApiPublicTelegramWebhookRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -99,6 +109,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicInboxRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/telegram-webhook': {
+      id: '/api/public/telegram-webhook'
+      path: '/api/public/telegram-webhook'
+      fullPath: '/api/public/telegram-webhook'
+      preLoaderRoute: typeof ApiPublicTelegramWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -107,6 +124,7 @@ const rootRouteChildren: RootRouteChildren = {
   InboxRoute: InboxRoute,
   ComposeRoute: ComposeRoute,
   ApiPublicInboxRoute: ApiPublicInboxRoute,
+  ApiPublicTelegramWebhookRoute: ApiPublicTelegramWebhookRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
