@@ -8,6 +8,7 @@ type RsvpInput = {
   location_url?: string;
   location_name?: string;
   personal_note?: string;
+  guest_name?: string;
 };
 
 export const submitRsvp = createServerFn({ method: "POST" })
@@ -38,6 +39,11 @@ export const submitRsvp = createServerFn({ method: "POST" })
       (typeof data.personal_note !== "string" || data.personal_note.length > 500)
     )
       throw new Error("Note too long");
+    if (
+      data.guest_name !== undefined &&
+      (typeof data.guest_name !== "string" || data.guest_name.length > 60)
+    )
+      throw new Error("Invalid guest name");
     return data;
   })
   .handler(async ({ data }) => {
@@ -52,18 +58,18 @@ export const submitRsvp = createServerFn({ method: "POST" })
         day: "numeric",
       });
       const noteSection = data.personal_note?.trim()
-        ? `\n\n📝 Her note:\n"${data.personal_note.trim()}"`
+        ? `\n\nHer note:\n"${data.personal_note.trim()}"`
         : "";
       const text =
-        `💌 SHE SAID YES\n\n` +
-        `Vibe: ${data.vibe === "food" ? "🍽 Food" : "🍹 Drinks"}\n` +
+        `SHE SAID YES${data.guest_name ? ` (from ${data.guest_name})` : ""}\n\n` +
+        `Vibe: ${data.vibe === "food" ? "Food" : "Drinks"}\n` +
         `Pick: ${data.choice}\n` +
         `Date: ${pretty}\n` +
         `Time: ${data.time_slot}\n` +
         (data.location_name ? `Place: ${data.location_name}\n` : "") +
         (data.location_url ? `Maps: ${data.location_url}` : "") +
         noteSection +
-        `\n\nDon't blow it.`;
+        `\n\nDo not blow it.`;
       try {
         await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
           method: "POST",

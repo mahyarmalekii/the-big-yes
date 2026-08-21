@@ -29,7 +29,7 @@ import { FloatingDoodles } from "@/components/visual/FloatingDoodles";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "The Big Yes — Personal Invitation" },
+      { title: "The Big Yes: Personal Invitation" },
       { name: "description", content: "A personal invitation. Are you free this week?" },
       { property: "og:title", content: "The Big Yes" },
       { property: "og:description", content: "A personal invitation. Are you free this week?" },
@@ -208,7 +208,6 @@ function DatingApp() {
     const rawJoke = params.get("joke") || params.get("msg") || params.get("topic");
 
     if (rawN) {
-      // If name parameter was sent with newlines (e.g. Ani\nResearch assistant job), parse cleanly
       if (rawN.includes("\n")) {
         const lines = rawN.split("\n").map((l) => l.trim()).filter(Boolean);
         setName(lines[0] || "YOU");
@@ -297,6 +296,7 @@ function DatingApp() {
           location_url: assignedLocation.url,
           location_name: assignedLocation.label,
           personal_note: personalNote.trim() || undefined,
+          guest_name: displayName || undefined,
         },
       });
     } catch (error) {
@@ -330,7 +330,7 @@ function DatingApp() {
           <span>yes</span>
         </div>
 
-        {/* STEP 1: ASK (Clean first impression) */}
+        {/* STEP 1: ASK */}
         {step === "ask" && (
           <div className="enter-fade space-y-5">
             <div className="flex items-center justify-between border-b border-black/15 pb-2">
@@ -415,7 +415,7 @@ function DatingApp() {
                 <span className="font-serif-italic text-3xl text-red-600">Are you sure?</span>
               </h2>
               <p className="text-sm text-black/80 leading-relaxed font-medium">
-                Because I already told my mom. She is making a scrapbook. Please do not do this to Linda.
+                Because I already told my mom{displayNick ? ` about you, ${displayNick}` : ""}. She is making a scrapbook. Please do not do this to Linda.
               </p>
               <div className="space-y-2.5 pt-2">
                 <button onClick={() => setStep("drink")} className="btn-primary-action w-full py-3 text-base">
@@ -496,11 +496,13 @@ function DatingApp() {
           <div className="enter-fade space-y-5">
             <div>
               <span className="font-mono text-xs text-blue-900 font-bold uppercase tracking-wider">
-                STEP 01 of 02: THE DRINK
+                STEP 01 OF 02: THE DRINK
               </span>
               <h2 className="font-heading text-3xl tracking-tight text-black mt-1">
                 What are we <br />
-                <span className="font-serif-italic text-4xl text-blue-800">having?</span>
+                <span className="font-serif-italic text-4xl text-blue-800">
+                  {displayNick ? `having, ${displayNick}?` : "having?"}
+                </span>
               </h2>
               <p className="font-handwriting text-xl text-black/70 mt-0.5 -rotate-1">
                 pick one. I will find the perfect spot for it.
@@ -571,7 +573,7 @@ function DatingApp() {
             <div>
               <div className="flex items-center justify-between">
                 <span className="font-mono text-xs text-green-900 font-bold uppercase tracking-wider">
-                  STEP 02 of 02: DATE and TIME
+                  STEP 02 OF 02: DATE AND TIME
                 </span>
                 <button
                   onClick={() => setStep("drink")}
@@ -581,8 +583,10 @@ function DatingApp() {
                 </button>
               </div>
               <h2 className="font-heading text-3xl tracking-tight text-black mt-1">
-                When are we <br />
-                <span className="font-serif-italic text-4xl text-green-800">doing this?</span>
+                When are you <br />
+                <span className="font-serif-italic text-4xl text-green-800">
+                  {displayNick ? `free, ${displayNick}?` : "free?"}
+                </span>
               </h2>
               <p className="font-handwriting text-xl text-black/70 mt-0.5 -rotate-1">
                 {isCoffee
@@ -647,13 +651,13 @@ function DatingApp() {
                   <div className="note-card p-3 bg-white rotate-[0.5deg] relative enter-fade">
                     <div className="tape-strip -top-2.5 left-1/4 rotate-1" />
                     <p className="font-handwriting text-lg text-black/60 mb-2">
-                      leave him a note{" "}
+                      leave a note{" "}
                       <span className="font-mono text-[10px] text-black/30">(optional)</span>
                     </p>
                     <textarea
                       value={personalNote}
                       onChange={(e) => setPersonalNote(e.target.value.slice(0, NOTE_MAX))}
-                      placeholder="anything you want him to know..."
+                      placeholder="anything you want to say before the big day..."
                       rows={3}
                       className="w-full resize-none bg-transparent border-b-2 border-dashed border-black/20 font-handwriting text-base text-black/80 placeholder:text-black/30 outline-none focus:border-black/40 transition-colors leading-relaxed"
                     />
@@ -688,7 +692,7 @@ function DatingApp() {
 
               <div className="space-y-1">
                 <h2 className="font-heading text-2xl sm:text-3xl leading-tight">
-                  Great news. <br />
+                  Great news{displayNick ? `, ${displayNick}` : ""}. <br />
                   <span className="font-serif-italic text-3xl sm:text-4xl text-green-800">
                     We are doing this.
                   </span>
@@ -743,7 +747,6 @@ function DatingApp() {
                   <span className="text-black/50 uppercase">Dress Code</span>
                   <span className="font-bold text-blue-900">Something nice</span>
                 </div>
-                {/* Her note echoed on the receipt */}
                 {personalNote.trim() && (
                   <div>
                     <span className="text-black/50 uppercase block mb-1">Your note</span>

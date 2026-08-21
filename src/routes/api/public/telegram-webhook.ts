@@ -25,7 +25,6 @@ export const Route = createFileRoute("/api/public/telegram-webhook")({
         const chatId = String(message.chat?.id ?? "");
         const rawText: string = (message.text ?? "").trim();
 
-        // Only respond to the owner
         if (chatId !== ownerId) return new Response("ok");
 
         if (!rawText) {
@@ -33,7 +32,6 @@ export const Route = createFileRoute("/api/public/telegram-webhook")({
           return new Response("ok");
         }
 
-        // Parse smartly: support newlines or pipes
         let name = "";
         let joke = "";
         let nick = "";
@@ -65,11 +63,11 @@ export const Route = createFileRoute("/api/public/telegram-webhook")({
         const inviteUrl = `${siteUrl}?${params.toString()}`;
 
         const reply =
-          `✅ Link ready\n\n` +
-          `👤 Name: ${name}\n` +
-          (joke ? `💡 Context / Joke: ${joke}\n` : "") +
-          (nick ? `🏷 Nick: ${nick}\n` : "") +
-          `\n🔗 ${inviteUrl}`;
+          `Link ready\n\n` +
+          `Name: ${name}\n` +
+          (joke ? `Agenda / Joke: ${joke}\n` : "") +
+          (nick ? `Nick: ${nick}\n` : "") +
+          `\nLink: ${inviteUrl}`;
 
         await sendTelegram(token, chatId, reply);
         return new Response("ok");
@@ -88,11 +86,11 @@ async function sendTelegram(token: string, chatId: string, text: string) {
 
 function helpText() {
   return (
-    `📝 How to generate a link:\n\n` +
-    `Simply send:\n` +
+    `How to generate a link:\n\n` +
+    `Send:\n` +
     `  Ani\n` +
     `  Research assistant job\n\n` +
-    `Or using pipes:\n` +
+    `Or with pipes:\n` +
     `  Ani | Research assistant job`
   );
 }
