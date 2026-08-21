@@ -180,38 +180,11 @@ const DRINK_OPTIONS: {
   },
 ];
 
-const DRINK_CLOSINGS: Record<NonNullable<DrinkPick>, string> = {
-  coffee: "Bring your best conversation topics.",
-  beer: "No pretense. Just good vibes.",
-  wine: "Dress to impress. Minimally.",
-  cocktail: "We are doing something memorable.",
-  water: "Chaotic good and I love it for us.",
-};
-
-const TIME_REACTIONS: Record<string, string> = {
-  "4:00 PM": "4 PM — a perfectly reasonable hour for an unreasonable amount of talking.",
-  "4:30 PM": "4:30 PM — early bird energy. Love it.",
-  "5:00 PM": "5 PM — golden hour. Perfect.",
-  "5:30 PM": "5:30 PM — the sweet spot.",
-  "6:00 PM": "6 PM — classic. Confident choice.",
-  "6:30 PM": "6:30 PM — fashionably on time.",
-  "7:00 PM": "7 PM — this is going to be a long, good night.",
-  "7:30 PM": "7:30 PM it is. Bold choice.",
-  "8:00 PM": "8 PM — properly evening. I like it.",
-  "8:30 PM": "8:30 PM — we are night people, clearly.",
-  "9:00 PM": "9 PM — living dangerously.",
-  "9:30 PM": "9:30 PM — this date has no curfew.",
-};
-
 const COFFEE_TIME_SLOTS = ["4:00 PM", "4:30 PM", "5:00 PM", "5:30 PM", "6:00 PM", "6:30 PM", "7:00 PM"];
 const EVENING_TIME_SLOTS = ["6:00 PM", "7:00 PM", "7:30 PM", "8:00 PM", "8:30 PM", "9:00 PM", "9:30 PM"];
 
-const NOTE_MAX = 500;
-
 function DatingApp() {
   const [name, setName] = useState("YOU");
-  const [nick, setNick] = useState<string | null>(null);
-  const [msg, setMsg] = useState<string | null>(null);
   const [step, setStep] = useState<Step>("ask");
   const [pick, setPick] = useState<DrinkPick>(null);
   const [date, setDate] = useState<Date | undefined>();
@@ -220,21 +193,11 @@ function DatingApp() {
   const [noPos, setNoPos] = useState({ x: 0, y: 0, n: 0 });
   const [copied, setCopied] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [personalNote, setPersonalNote] = useState<string>("");
-
-  // displayName: formal — used in FOR: header and receipt Guest row
-  const displayName = name !== "YOU" ? name : null;
-  // displayNick: casual — used in headings and footer. Falls back to displayName.
-  const displayNick = nick ?? displayName;
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const n = params.get("n");
     if (n) setName(n);
-    const nk = params.get("nick");
-    if (nk) setNick(nk);
-    const m = params.get("msg");
-    if (m) setMsg(m);
 
     if (params.get("rsvp") === "1") {
       if (params.get("k")) setPick(params.get("k") as DrinkPick);
@@ -306,8 +269,6 @@ function DatingApp() {
           time_slot: time,
           location_url: assignedLocation.url,
           location_name: assignedLocation.label,
-          personal_note: personalNote.trim() || undefined,
-          guest_name: displayName || undefined,
         },
       });
     } catch (error) {
@@ -345,7 +306,6 @@ function DatingApp() {
         {step === "ask" && (
           <div className="enter-fade space-y-5">
             <div className="flex items-center justify-between border-b border-black/15 pb-2">
-              {/* Formal name in the FOR: label */}
               <div className="font-mono text-xs text-black/70">
                 FOR: <span className="font-bold text-black border-b border-black px-1">{name}</span>
               </div>
@@ -359,7 +319,7 @@ function DatingApp() {
               <h1 className="font-heading text-3xl sm:text-4xl leading-[1.1] tracking-tight text-black">
                 Are you free <br />
                 <span className="font-serif-italic text-4xl sm:text-5xl text-blue-900 underline decoration-yellow-400 decoration-4 underline-offset-4">
-                  {displayNick ? `for a date this week, ${displayNick}?` : "for a date this week?"}
+                  for a date this week?
                 </span>
               </h1>
             </div>
@@ -367,16 +327,6 @@ function DatingApp() {
             <p className="text-sm text-black/80 leading-relaxed font-medium">
               I could have sent a regular text. Instead, I built this entire handwritten legal pad webpage. That should tell you something about my commitment to a great evening.
             </p>
-
-            {/* Personal message or inside joke — only shown if ?msg= is set */}
-            {msg && (
-              <div className="note-card p-3 bg-white rotate-[-1deg] relative">
-                <div className="tape-strip -top-2.5 left-1/4 rotate-1" />
-                <p className="font-handwriting text-lg text-black/75 leading-snug">
-                  {msg}
-                </p>
-              </div>
-            )}
 
             <div className="note-card p-2 bg-white rotate-[-1deg] my-2 relative">
               <div className="tape-strip -top-2.5 left-1/3 -rotate-2" />
@@ -657,42 +607,12 @@ function DatingApp() {
                   ))}
                 </div>
 
-                {/* Time-slot reaction */}
-                {time && (
-                  <p className="font-handwriting text-lg text-blue-700 font-semibold -rotate-1 enter-fade">
-                    {TIME_REACTIONS[time] ?? `${time} — perfect.`}
-                  </p>
-                )}
-
                 <div className="note-card p-3 bg-yellow-50 border border-yellow-300 rotate-[-0.5deg] relative mt-1">
                   <div className="tape-strip -top-2.5 left-1/2 -rotate-1" />
                   <p className="font-handwriting text-lg text-blue-800 font-semibold text-center">
                     oh and dress something nice
                   </p>
                 </div>
-
-                {/* Personal note — appears once both date + time are picked */}
-                {time && (
-                  <div className="note-card p-3.5 bg-white rotate-[0.5deg] relative enter-fade">
-                    <div className="tape-strip -top-2.5 left-1/4 rotate-1" />
-                    <p className="font-handwriting text-lg text-black/70 mb-2">
-                      ✍ leave him a note{" "}
-                      <span className="font-mono text-xs text-black/40 font-normal not-italic">
-                        (optional)
-                      </span>
-                    </p>
-                    <textarea
-                      value={personalNote}
-                      onChange={(e) => setPersonalNote(e.target.value.slice(0, NOTE_MAX))}
-                      placeholder="anything you want him to know before the big day..."
-                      rows={3}
-                      className="w-full resize-none bg-transparent border-b-2 border-dashed border-black/20 font-handwriting text-base text-black/80 placeholder:text-black/30 outline-none focus:border-black/40 transition-colors leading-relaxed"
-                    />
-                    <p className="font-mono text-[10px] text-black/30 text-right mt-1">
-                      {personalNote.length} / {NOTE_MAX}
-                    </p>
-                  </div>
-                )}
               </div>
             )}
 
@@ -736,13 +656,6 @@ function DatingApp() {
               </div>
 
               <div className="border-2 border-black rounded-lg p-3.5 bg-yellow-50/70 space-y-2.5 font-mono text-xs">
-                {/* Formal name only on the receipt */}
-                {displayName && (
-                  <div className="flex justify-between items-center pb-1.5 border-b border-black/10">
-                    <span className="text-black/50 uppercase">Guest</span>
-                    <span className="font-bold">{displayName.toUpperCase()}</span>
-                  </div>
-                )}
                 <div className="flex justify-between items-center pb-1.5 border-b border-black/10">
                   <span className="text-black/50 uppercase">Plan</span>
                   <span className="font-bold">{pickLabel}</span>
@@ -765,26 +678,11 @@ function DatingApp() {
                     {location?.label ?? "Curated Spot"}
                   </span>
                 </div>
-                <div className={`flex justify-between items-center ${personalNote.trim() ? "pb-1.5 border-b border-black/10" : ""}`}>
+                <div className="flex justify-between items-center">
                   <span className="text-black/50 uppercase">Dress Code</span>
                   <span className="font-bold text-blue-900">Something nice</span>
                 </div>
-                {personalNote.trim() && (
-                  <div className="pt-1">
-                    <span className="text-black/50 uppercase block mb-1">📝 Your note</span>
-                    <span className="font-handwriting text-sm text-black/80 leading-snug block text-right">
-                      &ldquo;{personalNote.trim()}&rdquo;
-                    </span>
-                  </div>
-                )}
               </div>
-
-              {/* Drink-specific closing line */}
-              {pick && (
-                <p className="font-handwriting text-lg text-blue-700 font-semibold text-center -rotate-1">
-                  {DRINK_CLOSINGS[pick]}
-                </p>
-              )}
 
               {location && (
                 <a
@@ -817,7 +715,6 @@ function DatingApp() {
                   setDate(undefined);
                   setTime(null);
                   setLocation(null);
-                  setPersonalNote("");
                   window.history.replaceState({}, "", window.location.pathname);
                 }}
                 className="text-center w-full font-mono text-xs text-black/40 hover:text-black py-1"
@@ -830,7 +727,7 @@ function DatingApp() {
 
         <footer className="mt-auto pt-6 pb-2 text-center border-t border-black/10">
           <p className="font-mono text-[10px] uppercase tracking-wider text-black/40">
-            The Big Yes &bull; Made with good intentions{displayNick ? ` for ${displayNick}` : ""} &bull; 2026
+            The Big Yes &bull; Made with good intentions &bull; 2026
           </p>
         </footer>
       </div>
