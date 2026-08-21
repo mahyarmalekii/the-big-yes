@@ -185,6 +185,8 @@ const EVENING_TIME_SLOTS = ["6:00 PM", "7:00 PM", "7:30 PM", "8:00 PM", "8:30 PM
 
 function DatingApp() {
   const [name, setName] = useState("YOU");
+  const [nick, setNick] = useState<string | null>(null);
+  const [msg, setMsg] = useState<string | null>(null);
   const [step, setStep] = useState<Step>("ask");
   const [pick, setPick] = useState<DrinkPick>(null);
   const [date, setDate] = useState<Date | undefined>();
@@ -194,10 +196,18 @@ function DatingApp() {
   const [copied, setCopied] = useState(false);
   const [saving, setSaving] = useState(false);
 
+  // Casual name used in heading/footer. Falls back to ?n= if ?nick= not set.
+  const displayName = name !== "YOU" ? name : null;
+  const displayNick = nick ?? displayName;
+
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const n = params.get("n");
     if (n) setName(n);
+    const nk = params.get("nick");
+    if (nk) setNick(nk);
+    const m = params.get("msg");
+    if (m) setMsg(m);
 
     if (params.get("rsvp") === "1") {
       if (params.get("k")) setPick(params.get("k") as DrinkPick);
@@ -307,6 +317,7 @@ function DatingApp() {
           <div className="enter-fade space-y-5">
             <div className="flex items-center justify-between border-b border-black/15 pb-2">
               <div className="font-mono text-xs text-black/70">
+                {/* ?n= changes this from YOU to her name */}
                 FOR: <span className="font-bold text-black border-b border-black px-1">{name}</span>
               </div>
               <span className="status-stamp">INVITATION</span>
@@ -319,7 +330,8 @@ function DatingApp() {
               <h1 className="font-heading text-3xl sm:text-4xl leading-[1.1] tracking-tight text-black">
                 Are you free <br />
                 <span className="font-serif-italic text-4xl sm:text-5xl text-blue-900 underline decoration-yellow-400 decoration-4 underline-offset-4">
-                  for a date this week?
+                  {/* ?nick= (or ?n= fallback) appends her name to the heading */}
+                  {displayNick ? `for a date this week, ${displayNick}?` : "for a date this week?"}
                 </span>
               </h1>
             </div>
@@ -327,6 +339,13 @@ function DatingApp() {
             <p className="text-sm text-black/80 leading-relaxed font-medium">
               I could have sent a regular text. Instead, I built this entire handwritten legal pad webpage. That should tell you something about my commitment to a great evening.
             </p>
+
+            {/* ?msg= shows as a plain handwriting line — no new design elements */}
+            {msg && (
+              <p className="font-handwriting text-lg text-black/70 -rotate-1">
+                {msg}
+              </p>
+            )}
 
             <div className="note-card p-2 bg-white rotate-[-1deg] my-2 relative">
               <div className="tape-strip -top-2.5 left-1/3 -rotate-2" />
@@ -727,7 +746,7 @@ function DatingApp() {
 
         <footer className="mt-auto pt-6 pb-2 text-center border-t border-black/10">
           <p className="font-mono text-[10px] uppercase tracking-wider text-black/40">
-            The Big Yes &bull; Made with good intentions &bull; 2026
+            The Big Yes &bull; Made with good intentions{displayNick ? ` for ${displayNick}` : ""} &bull; 2026
           </p>
         </footer>
       </div>
