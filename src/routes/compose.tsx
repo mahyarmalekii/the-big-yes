@@ -15,8 +15,8 @@ export const Route = createFileRoute("/compose")({
 function Compose() {
   const [baseUrl, setBaseUrl] = useState("");
   const [name, setName] = useState("");
+  const [joke, setJoke] = useState("");
   const [nick, setNick] = useState("");
-  const [msg, setMsg] = useState("");
   const [copied, setCopied] = useState(false);
   const [canShare, setCanShare] = useState(false);
 
@@ -28,8 +28,8 @@ function Compose() {
   const finalUrl = (() => {
     const p = new URLSearchParams();
     if (name.trim()) p.set("n", name.trim());
+    if (joke.trim()) p.set("joke", joke.trim());
     if (nick.trim()) p.set("nick", nick.trim());
-    if (msg.trim()) p.set("msg", msg.trim());
     const query = p.toString();
     return `${baseUrl}${query ? `?${query}` : ""}`;
   })();
@@ -54,14 +54,12 @@ function Compose() {
     value,
     onChange,
     placeholder,
-    multiline,
   }: {
     label: string;
     hint: string;
     value: string;
     onChange: (v: string) => void;
     placeholder: string;
-    multiline?: boolean;
   }) => (
     <div className="space-y-1.5">
       <div>
@@ -70,23 +68,13 @@ function Compose() {
         </p>
         <p className="font-mono text-[10px] text-black/40 mt-0.5">{hint}</p>
       </div>
-      {multiline ? (
-        <textarea
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          placeholder={placeholder}
-          rows={3}
-          className="w-full resize-none rounded-lg border-2 border-black/20 bg-white px-3 py-2.5 font-mono text-sm text-black placeholder:text-black/25 outline-none focus:border-black transition-colors"
-        />
-      ) : (
-        <input
-          type="text"
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          placeholder={placeholder}
-          className="w-full rounded-lg border-2 border-black/20 bg-white px-3 py-2.5 font-mono text-sm text-black placeholder:text-black/25 outline-none focus:border-black transition-colors"
-        />
-      )}
+      <input
+        type="text"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        className="w-full rounded-lg border-2 border-black/20 bg-white px-3 py-2.5 font-mono text-sm text-black placeholder:text-black/25 outline-none focus:border-black transition-colors"
+      />
     </div>
   );
 
@@ -111,25 +99,24 @@ function Compose() {
         <div className="space-y-4">
           <Field
             label="Her name"
-            hint="Shown in the FOR: header and on the receipt. Leave blank for default."
+            hint="Shown on the first screen header (FOR: Ani)"
             value={name}
             onChange={setName}
-            placeholder="Layla"
+            placeholder="Ani"
           />
           <Field
-            label="Nickname"
-            hint="Used in headings and footer — casual. Falls back to name if not set."
+            label="Inside joke / Topic / Context"
+            hint="Weaved naturally into the later steps & Date Receipt (e.g. Agenda / Dress code)"
+            value={joke}
+            onChange={setJoke}
+            placeholder="Research assistant job"
+          />
+          <Field
+            label="Nickname (optional)"
+            hint="Casual name for footer"
             value={nick}
             onChange={setNick}
-            placeholder="Lay"
-          />
-          <Field
-            label="Message or inside joke"
-            hint="Shown as a handwritten sticky note on the first screen. Only you two will get it."
-            value={msg}
-            onChange={setMsg}
-            placeholder="still think about that Sunday at Tempelhofer Feld"
-            multiline
+            placeholder="Anni"
           />
         </div>
 

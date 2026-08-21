@@ -188,7 +188,7 @@ const NOTE_MAX = 500;
 function DatingApp() {
   const [name, setName] = useState("YOU");
   const [nick, setNick] = useState<string | null>(null);
-  const [msg, setMsg] = useState<string | null>(null);
+  const [joke, setJoke] = useState<string | null>(null);
   const [step, setStep] = useState<Step>("ask");
   const [pick, setPick] = useState<DrinkPick>(null);
   const [date, setDate] = useState<Date | undefined>();
@@ -199,17 +199,31 @@ function DatingApp() {
   const [saving, setSaving] = useState(false);
   const [personalNote, setPersonalNote] = useState("");
 
-  const displayName = name !== "YOU" ? name : null;
-  const displayNick = nick ?? displayName;
+  const displayName = name !== "YOU" && name.trim().length > 0 ? name.trim() : null;
+  const displayNick = nick?.trim() || displayName;
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    const n = params.get("n");
-    if (n) setName(n);
+    const rawN = params.get("n");
+    const rawJoke = params.get("joke") || params.get("msg") || params.get("topic");
+
+    if (rawN) {
+      // If name parameter was sent with newlines (e.g. Ani\nResearch assistant job), parse cleanly
+      if (rawN.includes("\n")) {
+        const lines = rawN.split("\n").map((l) => l.trim()).filter(Boolean);
+        setName(lines[0] || "YOU");
+        if (!rawJoke && lines.length > 1) {
+          setJoke(lines.slice(1).join(" "));
+        }
+      } else {
+        setName(rawN.trim());
+      }
+    }
+
+    if (rawJoke) setJoke(rawJoke.trim());
+
     const nk = params.get("nick");
-    if (nk) setNick(nk);
-    const m = params.get("msg");
-    if (m) setMsg(m);
+    if (nk) setNick(nk.trim());
 
     if (params.get("rsvp") === "1") {
       if (params.get("k")) setPick(params.get("k") as DrinkPick);
@@ -238,8 +252,9 @@ function DatingApp() {
       t: time ?? "",
       l: location?.url ?? "",
     });
+    if (joke) p.set("joke", joke);
     return `${window.location.origin}${window.location.pathname}?${p.toString()}`;
-  }, [name, pick, date, time, location]);
+  }, [name, pick, date, time, location, joke]);
 
   const dodge = () => {
     setNoPos({
@@ -315,7 +330,7 @@ function DatingApp() {
           <span>yes</span>
         </div>
 
-        {/* STEP 1: ASK */}
+        {/* STEP 1: ASK (Clean first impression) */}
         {step === "ask" && (
           <div className="enter-fade space-y-5">
             <div className="flex items-center justify-between border-b border-black/15 pb-2">
@@ -340,12 +355,6 @@ function DatingApp() {
             <p className="text-sm text-black/80 leading-relaxed font-medium">
               I could have sent a regular text. Instead, I built this entire handwritten legal pad webpage. That should tell you something about my commitment to a great evening.
             </p>
-
-            {msg && (
-              <p className="font-handwriting text-lg text-black/70 -rotate-1">
-                {msg}
-              </p>
-            )}
 
             <div className="note-card p-2 bg-white rotate-[-1deg] my-2 relative">
               <div className="tape-strip -top-2.5 left-1/3 -rotate-2" />
@@ -629,11 +638,11 @@ function DatingApp() {
                 <div className="note-card p-3 bg-yellow-50 border border-yellow-300 rotate-[-0.5deg] relative mt-1">
                   <div className="tape-strip -top-2.5 left-1/2 -rotate-1" />
                   <p className="font-handwriting text-lg text-blue-800 font-semibold text-center">
-                    oh and dress something nice
+                    {joke ? `oh and dress something nice (${joke} approved)` : "oh and dress something nice"}
                   </p>
                 </div>
 
-                {/* Personal note — shown after time is picked, same card style as above */}
+                {/* Personal note textarea for her */}
                 {time && (
                   <div className="note-card p-3 bg-white rotate-[0.5deg] relative enter-fade">
                     <div className="tape-strip -top-2.5 left-1/4 rotate-1" />
@@ -696,6 +705,18 @@ function DatingApp() {
               </div>
 
               <div className="border-2 border-black rounded-lg p-3.5 bg-yellow-50/70 space-y-2.5 font-mono text-xs">
+                {displayName && (
+                  <div className="flex justify-between items-center pb-1.5 border-b border-black/10">
+                    <span className="text-black/50 uppercase">Guest</span>
+                    <span className="font-bold">{displayName.toUpperCase()}</span>
+                  </div>
+                )}
+                {joke && (
+                  <div className="flex justify-between items-center pb-1.5 border-b border-black/10">
+                    <span className="text-black/50 uppercase">Agenda</span>
+                    <span className="font-bold text-blue-900">{joke}</span>
+                  </div>
+                )}
                 <div className="flex justify-between items-center pb-1.5 border-b border-black/10">
                   <span className="text-black/50 uppercase">Plan</span>
                   <span className="font-bold">{pickLabel}</span>

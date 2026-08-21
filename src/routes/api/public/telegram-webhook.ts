@@ -9,8 +9,6 @@ export const Route = createFileRoute("/api/public/telegram-webhook")({
           "7825219518:AAEeaButGxggsZ3SPA-cFCq1t579CCaBFVs";
         const ownerId = process.env.TELEGRAM_CHAT_ID || "1882519733";
 
-        // Derive site URL from the incoming request URL itself —
-        // works correctly regardless of Origin header or env vars.
         const reqUrl = new URL(request.url);
         const siteUrl = process.env.SITE_URL || `${reqUrl.protocol}//${reqUrl.host}`;
 
@@ -25,19 +23,34 @@ export const Route = createFileRoute("/api/public/telegram-webhook")({
         if (!message) return new Response("ok");
 
         const chatId = String(message.chat?.id ?? "");
-        const text: string = message.text ?? "";
+        const rawText: string = (message.text ?? "").trim();
 
         // Only respond to the owner
         if (chatId !== ownerId) return new Response("ok");
 
-        // --- Parse the message ---
-        // Format: name | nickname | message or joke
-        // All fields after the first are optional.
-        // "Layla || inside joke" skips nick but keeps msg.
-        const parts = text.split("|").map((s) => s.trim());
-        const name = parts[0] ?? "";
-        const nickRaw = parts[1] ?? "";
-        const msgRaw = parts.slice(2).join("|").trim();
+        if (!rawText) {
+          await sendTelegram(token, chatId, helpText());
+          return new Response("ok");
+        }
+
+        // Parse smartly: support newlines or pipes
+        let name = "";
+        let joke = "";
+        let nick = "";
+
+        if (rawText.includes("\n")) {
+          const lines = rawText.split("\n").map((l) => l.trim()).filter(Boolean);
+          name = lines[0] || "";
+          joke = lines[1] || "";
+          nick = lines[2] || "";
+        } else if (rawText.includes("|")) {
+          const parts = rawText.split("|").map((s) => s.trim()).filter(Boolean);
+          name = parts[0] || "";
+          joke = parts[1] || "";
+          nick = parts[2] || "";
+        } else {
+          name = rawText;
+        }
 
         if (!name) {
           await sendTelegram(token, chatId, helpText());
@@ -46,15 +59,16 @@ export const Route = createFileRoute("/api/public/telegram-webhook")({
 
         const params = new URLSearchParams();
         params.set("n", name);
-        if (nickRaw) params.set("nick", nickRaw);
-        if (msgRaw) params.set("msg", msgRaw);
+        if (joke) params.set("joke", joke);
+        if (nick) params.set("nick", nick);
+
         const inviteUrl = `${siteUrl}?${params.toString()}`;
 
         const reply =
           `✅ Link ready\n\n` +
           `👤 Name: ${name}\n` +
-          (nickRaw ? `🏷 Nick: ${nickRaw}\n` : "") +
-          (msgRaw ? `💬 Msg: ${msgRaw}\n` : "") +
+          (joke ? `💡 Context / Joke: ${joke}\n` : "") +
+          (nick ? `🏷 Nick: ${nick}\n` : "") +
           `\n🔗 ${inviteUrl}`;
 
         await sendTelegram(token, chatId, reply);
@@ -75,12 +89,10 @@ async function sendTelegram(token: string, chatId: string, text: string) {
 function helpText() {
   return (
     `📝 How to generate a link:\n\n` +
-    `Send a message in this format:\n` +
-    `  name | nickname | message or joke\n\n` +
-    `Examples:\n` +
-    `  Layla\n` +
-    `  Layla | Lay\n` +
-    `  Layla | Lay | still think about that Sunday\n` +
-    `  Layla || still think about that Sunday`
+    `Simply send:\n` +
+    `  Ani\n` +
+    `  Research assistant job\n\n` +
+    `Or using pipes:\n` +
+    `  Ani | Research assistant job`
   );
 }
