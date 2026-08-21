@@ -183,6 +183,8 @@ const DRINK_OPTIONS: {
 const COFFEE_TIME_SLOTS = ["4:00 PM", "4:30 PM", "5:00 PM", "5:30 PM", "6:00 PM", "6:30 PM", "7:00 PM"];
 const EVENING_TIME_SLOTS = ["6:00 PM", "7:00 PM", "7:30 PM", "8:00 PM", "8:30 PM", "9:00 PM", "9:30 PM"];
 
+const NOTE_MAX = 500;
+
 function DatingApp() {
   const [name, setName] = useState("YOU");
   const [nick, setNick] = useState<string | null>(null);
@@ -195,8 +197,8 @@ function DatingApp() {
   const [noPos, setNoPos] = useState({ x: 0, y: 0, n: 0 });
   const [copied, setCopied] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [personalNote, setPersonalNote] = useState("");
 
-  // Casual name used in heading/footer. Falls back to ?n= if ?nick= not set.
   const displayName = name !== "YOU" ? name : null;
   const displayNick = nick ?? displayName;
 
@@ -279,6 +281,7 @@ function DatingApp() {
           time_slot: time,
           location_url: assignedLocation.url,
           location_name: assignedLocation.label,
+          personal_note: personalNote.trim() || undefined,
         },
       });
     } catch (error) {
@@ -317,7 +320,6 @@ function DatingApp() {
           <div className="enter-fade space-y-5">
             <div className="flex items-center justify-between border-b border-black/15 pb-2">
               <div className="font-mono text-xs text-black/70">
-                {/* ?n= changes this from YOU to her name */}
                 FOR: <span className="font-bold text-black border-b border-black px-1">{name}</span>
               </div>
               <span className="status-stamp">INVITATION</span>
@@ -330,7 +332,6 @@ function DatingApp() {
               <h1 className="font-heading text-3xl sm:text-4xl leading-[1.1] tracking-tight text-black">
                 Are you free <br />
                 <span className="font-serif-italic text-4xl sm:text-5xl text-blue-900 underline decoration-yellow-400 decoration-4 underline-offset-4">
-                  {/* ?nick= (or ?n= fallback) appends her name to the heading */}
                   {displayNick ? `for a date this week, ${displayNick}?` : "for a date this week?"}
                 </span>
               </h1>
@@ -340,7 +341,6 @@ function DatingApp() {
               I could have sent a regular text. Instead, I built this entire handwritten legal pad webpage. That should tell you something about my commitment to a great evening.
             </p>
 
-            {/* ?msg= shows as a plain handwriting line — no new design elements */}
             {msg && (
               <p className="font-handwriting text-lg text-black/70 -rotate-1">
                 {msg}
@@ -632,6 +632,27 @@ function DatingApp() {
                     oh and dress something nice
                   </p>
                 </div>
+
+                {/* Personal note — shown after time is picked, same card style as above */}
+                {time && (
+                  <div className="note-card p-3 bg-white rotate-[0.5deg] relative enter-fade">
+                    <div className="tape-strip -top-2.5 left-1/4 rotate-1" />
+                    <p className="font-handwriting text-lg text-black/60 mb-2">
+                      leave him a note{" "}
+                      <span className="font-mono text-[10px] text-black/30">(optional)</span>
+                    </p>
+                    <textarea
+                      value={personalNote}
+                      onChange={(e) => setPersonalNote(e.target.value.slice(0, NOTE_MAX))}
+                      placeholder="anything you want him to know..."
+                      rows={3}
+                      className="w-full resize-none bg-transparent border-b-2 border-dashed border-black/20 font-handwriting text-base text-black/80 placeholder:text-black/30 outline-none focus:border-black/40 transition-colors leading-relaxed"
+                    />
+                    <p className="font-mono text-[10px] text-black/30 text-right mt-1">
+                      {personalNote.length} / {NOTE_MAX}
+                    </p>
+                  </div>
+                )}
               </div>
             )}
 
@@ -697,10 +718,19 @@ function DatingApp() {
                     {location?.label ?? "Curated Spot"}
                   </span>
                 </div>
-                <div className="flex justify-between items-center">
+                <div className={cn("flex justify-between items-center", personalNote.trim() && "pb-1.5 border-b border-black/10")}>
                   <span className="text-black/50 uppercase">Dress Code</span>
                   <span className="font-bold text-blue-900">Something nice</span>
                 </div>
+                {/* Her note echoed on the receipt */}
+                {personalNote.trim() && (
+                  <div>
+                    <span className="text-black/50 uppercase block mb-1">Your note</span>
+                    <p className="font-handwriting text-sm text-black/75 leading-snug">
+                      &ldquo;{personalNote.trim()}&rdquo;
+                    </p>
+                  </div>
+                )}
               </div>
 
               {location && (
@@ -734,6 +764,7 @@ function DatingApp() {
                   setDate(undefined);
                   setTime(null);
                   setLocation(null);
+                  setPersonalNote("");
                   window.history.replaceState({}, "", window.location.pathname);
                 }}
                 className="text-center w-full font-mono text-xs text-black/40 hover:text-black py-1"
