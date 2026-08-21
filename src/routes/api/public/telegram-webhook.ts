@@ -1,21 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-/**
- * Telegram webhook — receives messages from Mahyar's bot and replies
- * with a personalized invite link.
- *
- * Message format (pipe-separated, all optional after the first):
- *   name | nickname | message or inside joke
- *
- * Examples:
- *   Layla
- *   Layla | Lay
- *   Layla | Lay | still think about that Sunday at Tempelhofer
- *   Layla || still think about that Sunday   (skip nick, keep msg)
- *
- * Security: only processes messages from the owner's chat ID.
- */
-
 export const Route = createFileRoute("/api/public/telegram-webhook")({
   server: {
     handlers: {
@@ -24,9 +8,11 @@ export const Route = createFileRoute("/api/public/telegram-webhook")({
           process.env.TELEGRAM_BOT_TOKEN ||
           "7825219518:AAEeaButGxggsZ3SPA-cFCq1t579CCaBFVs";
         const ownerId = process.env.TELEGRAM_CHAT_ID || "1882519733";
-        const siteUrl =
-          process.env.SITE_URL ||
-          (request.headers.get("origin") ?? "https://the-big-yes.com");
+
+        // Derive site URL from the incoming request URL itself —
+        // works correctly regardless of Origin header or env vars.
+        const reqUrl = new URL(request.url);
+        const siteUrl = process.env.SITE_URL || `${reqUrl.protocol}//${reqUrl.host}`;
 
         let body: any;
         try {
@@ -45,26 +31,25 @@ export const Route = createFileRoute("/api/public/telegram-webhook")({
         if (chatId !== ownerId) return new Response("ok");
 
         // --- Parse the message ---
-        // Split on | allowing empty segments (e.g. "Layla || joke")
+        // Format: name | nickname | message or joke
+        // All fields after the first are optional.
+        // "Layla || inside joke" skips nick but keeps msg.
         const parts = text.split("|").map((s) => s.trim());
         const name = parts[0] ?? "";
         const nickRaw = parts[1] ?? "";
         const msgRaw = parts.slice(2).join("|").trim();
 
-        // Need at least a name
         if (!name) {
           await sendTelegram(token, chatId, helpText());
           return new Response("ok");
         }
 
-        // Build the URL
         const params = new URLSearchParams();
-        if (name) params.set("n", name);
+        params.set("n", name);
         if (nickRaw) params.set("nick", nickRaw);
         if (msgRaw) params.set("msg", msgRaw);
         const inviteUrl = `${siteUrl}?${params.toString()}`;
 
-        // Reply with the link
         const reply =
           `✅ Link ready\n\n` +
           `👤 Name: ${name}\n` +
@@ -92,10 +77,10 @@ function helpText() {
     `📝 How to generate a link:\n\n` +
     `Send a message in this format:\n` +
     `  name | nickname | message or joke\n\n` +
-    `All fields after the first are optional:\n` +
+    `Examples:\n` +
     `  Layla\n` +
     `  Layla | Lay\n` +
     `  Layla | Lay | still think about that Sunday\n` +
-    `  Layla || still think about that Sunday\ (skip nick)`
+    `  Layla || still think about that Sunday`
   );
 }
