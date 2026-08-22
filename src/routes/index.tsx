@@ -151,32 +151,18 @@ const DRINK_OPTIONS: {
   },
 ];
 
-const DRINK_JOKE_NOTES: Record<string, string[]> = {
-  beer: [
-    "First round on me, no talking about work allowed",
-    "Permission granted to judge my music taste",
-    "Casual vibes and zero pretension guaranteed",
-    "Cold drinks and high quality conversation",
-  ],
-  wine: [
-    "I promise not to pretend I know what vintage it is",
-    "High probability of accidental deep life conversations",
-    "Very classy until the second glass arrives",
-    "Tasting notes: great vibes and exceptional company",
-  ],
-  cocktail: [
-    "100 percent chemistry, zero hangover, crushing work tomorrow",
-    "Dangerous levels of charisma and staying sharp",
-    "Staying hydrated, sharp, and suspiciously charming",
-    "Botanical elixirs and top tier banter",
-  ],
-  coffee: [
-    "This quick coffee is definitely turning into a 3 hour talk",
-    "Pastry sharing policy: strictly 50/50",
-    "Caffeine fueled banter and great stories ahead",
-    "An excuse to talk until they close the shop",
-  ],
-};
+const FUNNY_ABSURD_NOTES = [
+  "Don't be late",
+  "Strictly no crypto talk",
+  "You must laugh at at least two of my jokes",
+  "No acoustic guitars allowed",
+  "I am legally required to be charming",
+  "First one to check their phone buys dessert",
+  "Prepare to defend your worst opinion",
+  "I will pretend to understand your job",
+  "No discussing astrology before 8 PM",
+  "Must bring top tier gossip",
+];
 
 const COFFEE_TIME_SLOTS = ["4:00 PM", "4:30 PM", "5:00 PM", "5:30 PM", "6:00 PM", "6:30 PM", "7:00 PM"];
 const NON_ALCOHOLIC_TIME_SLOTS = ["5:00 PM", "5:30 PM", "6:00 PM", "6:30 PM", "7:00 PM", "7:30 PM", "8:00 PM", "8:30 PM", "9:00 PM", "9:30 PM"];
@@ -200,10 +186,10 @@ function DatingApp() {
     const n = params.get("n");
     if (n) setName(n);
 
-    const customNote = params.get("m") || params.get("note");
-    if (customNote) {
-      setUserNote(customNote);
-      setDisplayNote(customNote);
+    const customContext = params.get("context") || params.get("note") || params.get("m") || params.get("msg");
+    if (customContext) {
+      setUserNote(customContext);
+      setDisplayNote(customContext);
     }
 
     if (params.get("rsvp") === "1") {
@@ -272,8 +258,7 @@ function DatingApp() {
     const typedNote = userNote.trim();
     let finalNote = typedNote;
     if (!finalNote) {
-      const jokes = DRINK_JOKE_NOTES[pick] || DRINK_JOKE_NOTES.cocktail;
-      finalNote = jokes[Math.floor(Math.random() * jokes.length)];
+      finalNote = FUNNY_ABSURD_NOTES[Math.floor(Math.random() * FUNNY_ABSURD_NOTES.length)];
     }
     setDisplayNote(finalNote);
 
@@ -628,31 +613,33 @@ function DatingApp() {
                   </p>
                 </div>
 
-                <div className="note-card p-3 bg-white border border-black/20 rotate-[0.5deg] relative mt-1 space-y-2">
+                <div className="note-card p-3.5 bg-white border-2 border-black rotate-[0.5deg] relative mt-1 space-y-2.5">
                   <div className="tape-strip -top-2.5 left-8 -rotate-2" />
                   <div className="flex items-center justify-between">
-                    <label className="font-handwriting text-base text-blue-900 font-semibold block">
+                    <label className="font-handwriting text-xl text-blue-900 font-bold block">
                       leave a note for me (optional):
                     </label>
-                    <span className="font-mono text-[10px] text-black/40 uppercase">quick picks</span>
+                    <span className="font-handwriting text-sm text-black/50">quick picks</span>
                   </div>
 
                   <div className="flex flex-wrap gap-1.5">
                     {[
                       "Don't be late",
+                      "Strictly no crypto talk",
+                      "Must laugh at my jokes",
                       "First round is on you",
-                      "No talking about work",
-                      "Wear something cool",
+                      "No acoustic guitars",
+                      "Prepare good gossip",
                     ].map((preset) => (
                       <button
                         key={preset}
                         type="button"
                         onClick={() => setUserNote(preset)}
                         className={cn(
-                          "px-2.5 py-1 rounded border text-[11px] font-mono transition-all",
+                          "px-3 py-1 rounded-full border text-base font-handwriting transition-all",
                           userNote === preset
-                            ? "bg-yellow-300 border-black font-bold text-black shadow-xs"
-                            : "bg-yellow-50/90 border-black/25 text-black/80 hover:border-black hover:bg-yellow-100"
+                            ? "bg-yellow-300 border-black font-bold text-black shadow-xs scale-105"
+                            : "bg-yellow-50/90 border-black/30 text-blue-900 hover:border-black hover:bg-yellow-100"
                         )}
                       >
                         {preset}
@@ -663,9 +650,9 @@ function DatingApp() {
                   <textarea
                     value={userNote}
                     onChange={(e) => setUserNote(e.target.value)}
-                    placeholder="or type your own custom note or joke..."
+                    placeholder="or write your note here in your own words..."
                     rows={2}
-                    className="w-full bg-yellow-50/60 border border-black/20 rounded p-2 text-xs font-handwriting text-black focus:outline-none focus:border-black placeholder:text-black/40 resize-none"
+                    className="w-full bg-yellow-50/70 border-2 border-dashed border-blue-900/40 rounded-lg p-2.5 text-lg font-handwriting text-blue-950 font-semibold focus:outline-none focus:border-black placeholder:text-blue-900/40 resize-none leading-tight"
                   />
                 </div>
               </div>
@@ -738,13 +725,14 @@ function DatingApp() {
                   <span className="font-bold text-blue-900">Something nice</span>
                 </div>
 
-                {/* VISIBLE & PROMINENT SPECIAL NOTE / VIBE CARD */}
-                <div className="mt-2 bg-yellow-100/90 border-2 border-blue-900/30 rounded-md p-3 space-y-1 relative shadow-xs">
-                  <span className="font-mono text-[10px] text-blue-900 font-bold uppercase tracking-wider block">
-                    Special Note / Vibe:
+                {/* VISIBLE & PROMINENT HANDWRITTEN PEN INK NOTE */}
+                <div className="mt-2 bg-white/95 border-2 border-black rounded-lg p-3 space-y-1 relative rotate-[-0.5deg] shadow-sm">
+                  <div className="tape-strip -top-2.5 left-6 -rotate-2" />
+                  <span className="font-handwriting text-sm text-black/50 font-bold block uppercase tracking-wide">
+                    handwritten note:
                   </span>
-                  <p className="font-handwriting text-lg text-blue-950 leading-snug font-bold">
-                    "{displayNote || userNote || "Looking forward to this all week"}"
+                  <p className="font-handwriting text-2xl text-blue-800 leading-snug font-bold">
+                    "{displayNote || userNote || "Don't be late"}"
                   </p>
                 </div>
               </div>
