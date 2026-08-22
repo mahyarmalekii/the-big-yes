@@ -8,7 +8,7 @@ import {
   Clock,
   Coffee,
   Copy,
-  Droplets,
+  CupSoda,
   GlassWater,
   Heart,
   MapPin,
@@ -20,7 +20,7 @@ import {
 } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
-import { submitRsvp, recordVisit } from "@/lib/rsvp.functions";
+import { submitRsvp } from "@/lib/rsvp.functions";
 import { Sketch3DCanvas } from "@/components/3d/Sketch3DCanvas";
 import { Diorama3D } from "@/components/3d/Diorama3D";
 import { TiltCard } from "@/components/3d/TiltCard";
@@ -29,7 +29,7 @@ import { FloatingDoodles } from "@/components/visual/FloatingDoodles";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "The Big Yes: Personal Invitation" },
+      { title: "The Big Yes — Personal Invitation" },
       { name: "description", content: "A personal invitation. Are you free this week?" },
       { property: "og:title", content: "The Big Yes" },
       { property: "og:description", content: "A personal invitation. Are you free this week?" },
@@ -112,22 +112,6 @@ const LOCATIONS: LocationPick[] = [
     url: "https://www.google.com/maps/search/?api=1&query=Ora+Berlin+Oranienstra%C3%9Fe+168+10999+Berlin",
     category: "cocktail",
   },
-  // Water at parks
-  {
-    label: "Tempelhofer Feld the old runway turned park",
-    url: "https://www.google.com/maps/search/?api=1&query=Tempelhofer+Feld+Berlin",
-    category: "water",
-  },
-  {
-    label: "Volkspark Friedrichshain with a bottle of tap water",
-    url: "https://www.google.com/maps/search/?api=1&query=Volkspark+Friedrichshain+Berlin",
-    category: "water",
-  },
-  {
-    label: "Treptower Park with spectacular river views and zero alcohol",
-    url: "https://www.google.com/maps/search/?api=1&query=Treptower+Park+Berlin",
-    category: "water",
-  },
 ];
 
 const DRINK_OPTIONS: {
@@ -135,60 +119,48 @@ const DRINK_OPTIONS: {
   label: string;
   sub: string;
   Icon: LucideIcon;
-  note: string;
+  note?: string;
   color: string;
 }[] = [
   {
-    id: "coffee",
-    label: "Coffee",
-    sub: "A quiet corner, a good flat white, and an excuse to talk for three hours straight",
-    Icon: Coffee,
-    note: "Low key and absolutely devastating",
-    color: "bg-amber-100 text-amber-900",
-  },
-  {
     id: "beer",
     label: "Beer",
-    sub: "Cold, crisp, and the only truly honest drink in Berlin",
+    sub: "Two cold beers and pretending we have our lives together",
     Icon: Beer,
-    note: "No pretense whatsoever",
+    note: "Honest and zero pretension",
     color: "bg-yellow-100 text-yellow-900",
   },
   {
     id: "wine",
     label: "Wine",
-    sub: "A glass of something that makes both of us seem significantly more interesting",
+    sub: "Two glasses in and we will tell our whole life story",
     Icon: Wine,
-    note: "Classy until the second glass",
+    note: "Classy until the second bottle",
     color: "bg-purple-100 text-purple-900",
   },
   {
     id: "cocktail",
-    label: "Cocktail",
-    sub: "Something clever in a dimly lit room where we can pretend to be sophisticated adults",
-    Icon: GlassWater,
-    note: "Sophisticated until it is not",
-    color: "bg-pink-100 text-pink-900",
+    label: "Non Alcoholic Drink",
+    sub: "Fancy mocktails so we look cool and stay sharp",
+    Icon: CupSoda,
+    color: "bg-teal-100 text-teal-900",
   },
   {
-    id: "water",
-    label: "Water",
-    sub: "We sit on a park bench, watch the joggers go by, and question all of our life choices together",
-    Icon: Droplets,
-    note: "Chaotic good energy and I love it",
-    color: "bg-sky-100 text-sky-900",
+    id: "coffee",
+    label: "Coffee",
+    sub: "A quick coffee that secretly turns into a three hour talk",
+    Icon: Coffee,
+    note: "Low key and dangerous",
+    color: "bg-amber-100 text-amber-900",
   },
 ];
 
 const COFFEE_TIME_SLOTS = ["4:00 PM", "4:30 PM", "5:00 PM", "5:30 PM", "6:00 PM", "6:30 PM", "7:00 PM"];
+const NON_ALCOHOLIC_TIME_SLOTS = ["5:00 PM", "5:30 PM", "6:00 PM", "6:30 PM", "7:00 PM", "7:30 PM", "8:00 PM", "8:30 PM", "9:00 PM", "9:30 PM"];
 const EVENING_TIME_SLOTS = ["6:00 PM", "7:00 PM", "7:30 PM", "8:00 PM", "8:30 PM", "9:00 PM", "9:30 PM"];
-
-const NOTE_MAX = 500;
 
 function DatingApp() {
   const [name, setName] = useState("YOU");
-  const [nick, setNick] = useState<string | null>(null);
-  const [joke, setJoke] = useState<string | null>(null);
   const [step, setStep] = useState<Step>("ask");
   const [pick, setPick] = useState<DrinkPick>(null);
   const [date, setDate] = useState<Date | undefined>();
@@ -197,40 +169,13 @@ function DatingApp() {
   const [noPos, setNoPos] = useState({ x: 0, y: 0, n: 0 });
   const [copied, setCopied] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [personalNote, setPersonalNote] = useState("");
-
-  const displayName = name !== "YOU" && name.trim().length > 0 ? name.trim() : null;
-  const displayNick = nick?.trim() || displayName;
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    const rawN = params.get("n");
-    const rawJoke = params.get("joke") || params.get("msg") || params.get("topic");
+    const n = params.get("n");
+    if (n) setName(n);
 
-    let parsedName = "YOU";
-    let parsedJoke = rawJoke ? rawJoke.trim() : null;
-
-    if (rawN) {
-      if (rawN.includes("\n")) {
-        const lines = rawN.split("\n").map((l) => l.trim()).filter(Boolean);
-        parsedName = lines[0] || "YOU";
-        if (!parsedJoke && lines.length > 1) {
-          parsedJoke = lines.slice(1).join(" ");
-        }
-      } else {
-        parsedName = rawN.trim();
-      }
-      setName(parsedName);
-    }
-
-    if (parsedJoke) setJoke(parsedJoke);
-
-    const nk = params.get("nick");
-    if (nk) setNick(nk.trim());
-
-    const isRsvp = params.get("rsvp") === "1";
-
-    if (isRsvp) {
+    if (params.get("rsvp") === "1") {
       if (params.get("k")) setPick(params.get("k") as DrinkPick);
       if (params.get("d")) setDate(new Date(params.get("d")!));
       if (params.get("t")) setTime(params.get("t"));
@@ -240,26 +185,13 @@ function DatingApp() {
       }
       setStep("done");
     }
-
-    // Notify on Telegram when the link is opened (deduplicated per session)
-    const sessionKey = `visit_notified_${parsedName}_${isRsvp ? "rsvp" : "ask"}`;
-    if (typeof window !== "undefined" && !sessionStorage.getItem(sessionKey)) {
-      sessionStorage.setItem(sessionKey, "1");
-      const guestForNotify = parsedName !== "YOU" ? parsedName : undefined;
-      recordVisit({
-        data: {
-          guest_name: guestForNotify,
-          agenda: parsedJoke || undefined,
-          is_rsvp_view: isRsvp,
-        },
-      }).catch((err) => console.error("Visit recording failed:", err));
-    }
   }, []);
 
   const currentPickObj = DRINK_OPTIONS.find((item) => item.id === pick);
   const pickLabel = currentPickObj?.label ?? "";
   const isCoffee = pick === "coffee";
-  const timeSlots = isCoffee ? COFFEE_TIME_SLOTS : EVENING_TIME_SLOTS;
+  const isNonAlcoholic = pick === "cocktail";
+  const timeSlots = isCoffee ? COFFEE_TIME_SLOTS : isNonAlcoholic ? NON_ALCOHOLIC_TIME_SLOTS : EVENING_TIME_SLOTS;
 
   const shareUrl = useMemo(() => {
     if (typeof window === "undefined") return "";
@@ -271,9 +203,8 @@ function DatingApp() {
       t: time ?? "",
       l: location?.url ?? "",
     });
-    if (joke) p.set("joke", joke);
     return `${window.location.origin}${window.location.pathname}?${p.toString()}`;
-  }, [name, pick, date, time, location, joke]);
+  }, [name, pick, date, time, location]);
 
   const dodge = () => {
     setNoPos({
@@ -315,9 +246,6 @@ function DatingApp() {
           time_slot: time,
           location_url: assignedLocation.url,
           location_name: assignedLocation.label,
-          personal_note: personalNote.trim() || undefined,
-          guest_name: displayName || (name !== "YOU" ? name : undefined),
-          agenda: joke || undefined,
         },
       });
     } catch (error) {
@@ -368,7 +296,7 @@ function DatingApp() {
               <h1 className="font-heading text-3xl sm:text-4xl leading-[1.1] tracking-tight text-black">
                 Are you free <br />
                 <span className="font-serif-italic text-4xl sm:text-5xl text-blue-900 underline decoration-yellow-400 decoration-4 underline-offset-4">
-                  {displayNick ? `for a date this week, ${displayNick}?` : "for a date this week?"}
+                  for a date this week?
                 </span>
               </h1>
             </div>
@@ -436,7 +364,7 @@ function DatingApp() {
                 <span className="font-serif-italic text-3xl text-red-600">Are you sure?</span>
               </h2>
               <p className="text-sm text-black/80 leading-relaxed font-medium">
-                Because I already told my mom{displayNick ? ` about you, ${displayNick}` : ""}. She is making a scrapbook. Please do not do this to Linda.
+                Because I already told my mom. She is making a scrapbook. Please do not do this to Linda.
               </p>
               <div className="space-y-2.5 pt-2">
                 <button onClick={() => setStep("drink")} className="btn-primary-action w-full py-3 text-base">
@@ -517,13 +445,11 @@ function DatingApp() {
           <div className="enter-fade space-y-5">
             <div>
               <span className="font-mono text-xs text-blue-900 font-bold uppercase tracking-wider">
-                STEP 01 OF 02: THE DRINK
+                STEP 01 of 02: THE DRINK
               </span>
               <h2 className="font-heading text-3xl tracking-tight text-black mt-1">
                 What are we <br />
-                <span className="font-serif-italic text-4xl text-blue-800">
-                  {displayNick ? `having, ${displayNick}?` : "having?"}
-                </span>
+                <span className="font-serif-italic text-4xl text-blue-800">having?</span>
               </h2>
               <p className="font-handwriting text-xl text-black/70 mt-0.5 -rotate-1">
                 pick one. I will find the perfect spot for it.
@@ -539,7 +465,7 @@ function DatingApp() {
             </div>
 
             <div className="grid gap-3">
-              {DRINK_OPTIONS.map(({ id, label, sub, Icon, note, color }, idx) => {
+              {DRINK_OPTIONS.map(({ id, label, sub, Icon, note, color }) => {
                 const selected = pick === id;
                 return (
                   <TiltCard
@@ -558,14 +484,13 @@ function DatingApp() {
                         <Icon size={22} />
                       </div>
                       <div className="flex-1">
-                        <div className="flex items-center justify-between">
-                          <span className="font-heading text-base">{label}</span>
-                          <span className="font-mono text-xs font-bold text-black/40">0{idx + 1}</span>
-                        </div>
+                        <span className="font-heading text-base block">{label}</span>
                         <p className="text-xs text-black/70 mt-0.5">{sub}</p>
-                        <p className="font-handwriting text-sm text-blue-700 mt-1 font-semibold">
-                          {note}
-                        </p>
+                        {note && (
+                          <p className="font-handwriting text-sm text-blue-700 mt-1 font-semibold">
+                            {note}
+                          </p>
+                        )}
                       </div>
                       {selected && (
                         <div className="self-center p-1 rounded-full bg-black text-white">
@@ -594,7 +519,7 @@ function DatingApp() {
             <div>
               <div className="flex items-center justify-between">
                 <span className="font-mono text-xs text-green-900 font-bold uppercase tracking-wider">
-                  STEP 02 OF 02: DATE AND TIME
+                  STEP 02 of 02: DATE and TIME
                 </span>
                 <button
                   onClick={() => setStep("drink")}
@@ -604,14 +529,14 @@ function DatingApp() {
                 </button>
               </div>
               <h2 className="font-heading text-3xl tracking-tight text-black mt-1">
-                When are you <br />
-                <span className="font-serif-italic text-4xl text-green-800">
-                  {displayNick ? `free, ${displayNick}?` : "free?"}
-                </span>
+                When are we <br />
+                <span className="font-serif-italic text-4xl text-green-800">doing this?</span>
               </h2>
               <p className="font-handwriting text-xl text-black/70 mt-0.5 -rotate-1">
                 {isCoffee
                   ? "coffee hours only: pick any day from tomorrow, between 4 PM and 7 PM."
+                  : isNonAlcoholic
+                  ? "golden hour & evening: pick any day from tomorrow, starting at 5 PM."
                   : "select any day from tomorrow, then pick an evening time."}
               </p>
             </div>
@@ -645,7 +570,7 @@ function DatingApp() {
                 <div className="flex items-center gap-1.5">
                   <Clock size={15} className="text-black/70" />
                   <span className="font-heading text-xs uppercase tracking-wider">
-                    {isCoffee ? "Select an Afternoon Time" : "Select an Evening Time"}
+                    {isCoffee ? "Select an Afternoon Time" : isNonAlcoholic ? "Select a Time (Starting at 5:00 PM)" : "Select an Evening Time"}
                   </span>
                 </div>
                 <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
@@ -663,30 +588,9 @@ function DatingApp() {
                 <div className="note-card p-3 bg-yellow-50 border border-yellow-300 rotate-[-0.5deg] relative mt-1">
                   <div className="tape-strip -top-2.5 left-1/2 -rotate-1" />
                   <p className="font-handwriting text-lg text-blue-800 font-semibold text-center">
-                    {joke ? `oh and dress something nice (${joke} approved)` : "oh and dress something nice"}
+                    oh and dress something nice
                   </p>
                 </div>
-
-                {/* Personal note textarea for her */}
-                {time && (
-                  <div className="note-card p-3 bg-white rotate-[0.5deg] relative enter-fade">
-                    <div className="tape-strip -top-2.5 left-1/4 rotate-1" />
-                    <p className="font-handwriting text-lg text-black/60 mb-2">
-                      leave a note{" "}
-                      <span className="font-mono text-[10px] text-black/30">(optional)</span>
-                    </p>
-                    <textarea
-                      value={personalNote}
-                      onChange={(e) => setPersonalNote(e.target.value.slice(0, NOTE_MAX))}
-                      placeholder="anything you want to say before the big day..."
-                      rows={3}
-                      className="w-full resize-none bg-transparent border-b-2 border-dashed border-black/20 font-handwriting text-base text-black/80 placeholder:text-black/30 outline-none focus:border-black/40 transition-colors leading-relaxed"
-                    />
-                    <p className="font-mono text-[10px] text-black/30 text-right mt-1">
-                      {personalNote.length} / {NOTE_MAX}
-                    </p>
-                  </div>
-                )}
               </div>
             )}
 
@@ -713,7 +617,7 @@ function DatingApp() {
 
               <div className="space-y-1">
                 <h2 className="font-heading text-2xl sm:text-3xl leading-tight">
-                  Great news{displayNick ? `, ${displayNick}` : ""}. <br />
+                  Great news. <br />
                   <span className="font-serif-italic text-3xl sm:text-4xl text-green-800">
                     We are doing this.
                   </span>
@@ -730,18 +634,6 @@ function DatingApp() {
               </div>
 
               <div className="border-2 border-black rounded-lg p-3.5 bg-yellow-50/70 space-y-2.5 font-mono text-xs">
-                {displayName && (
-                  <div className="flex justify-between items-center pb-1.5 border-b border-black/10">
-                    <span className="text-black/50 uppercase">Guest</span>
-                    <span className="font-bold">{displayName.toUpperCase()}</span>
-                  </div>
-                )}
-                {joke && (
-                  <div className="flex justify-between items-center pb-1.5 border-b border-black/10">
-                    <span className="text-black/50 uppercase">Agenda</span>
-                    <span className="font-bold text-blue-900">{joke}</span>
-                  </div>
-                )}
                 <div className="flex justify-between items-center pb-1.5 border-b border-black/10">
                   <span className="text-black/50 uppercase">Plan</span>
                   <span className="font-bold">{pickLabel}</span>
@@ -764,18 +656,10 @@ function DatingApp() {
                     {location?.label ?? "Curated Spot"}
                   </span>
                 </div>
-                <div className={cn("flex justify-between items-center", personalNote.trim() && "pb-1.5 border-b border-black/10")}>
+                <div className="flex justify-between items-center">
                   <span className="text-black/50 uppercase">Dress Code</span>
                   <span className="font-bold text-blue-900">Something nice</span>
                 </div>
-                {personalNote.trim() && (
-                  <div>
-                    <span className="text-black/50 uppercase block mb-1">Your note</span>
-                    <p className="font-handwriting text-sm text-black/75 leading-snug">
-                      &ldquo;{personalNote.trim()}&rdquo;
-                    </p>
-                  </div>
-                )}
               </div>
 
               {location && (
@@ -809,7 +693,6 @@ function DatingApp() {
                   setDate(undefined);
                   setTime(null);
                   setLocation(null);
-                  setPersonalNote("");
                   window.history.replaceState({}, "", window.location.pathname);
                 }}
                 className="text-center w-full font-mono text-xs text-black/40 hover:text-black py-1"
@@ -822,7 +705,7 @@ function DatingApp() {
 
         <footer className="mt-auto pt-6 pb-2 text-center border-t border-black/10">
           <p className="font-mono text-[10px] uppercase tracking-wider text-black/40">
-            The Big Yes &bull; Made with good intentions{displayNick ? ` for ${displayNick}` : ""} &bull; 2026
+            The Big Yes &bull; Made with good intentions &bull; 2026
           </p>
         </footer>
       </div>
