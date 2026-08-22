@@ -175,6 +175,7 @@ function DatingApp() {
   const [date, setDate] = useState<Date | undefined>();
   const [time, setTime] = useState<string | null>(null);
   const [location, setLocation] = useState<LocationPick | null>(null);
+  const [userNote, setUserNote] = useState("");
   const [assignedRule, setAssignedRule] = useState("");
   const [noPos, setNoPos] = useState({ x: 0, y: 0, n: 0 });
   const [copied, setCopied] = useState(false);
@@ -187,6 +188,7 @@ function DatingApp() {
 
     const ruleParam = params.get("r") || params.get("m") || params.get("note");
     if (ruleParam) {
+      setUserNote(ruleParam);
       setAssignedRule(ruleParam);
     }
 
@@ -217,10 +219,10 @@ function DatingApp() {
       d: date?.toISOString() ?? "",
       t: time ?? "",
       l: location?.url ?? "",
-      r: assignedRule || "",
+      r: assignedRule || userNote || "",
     });
     return `${window.location.origin}${window.location.pathname}?${p.toString()}`;
-  }, [name, pick, date, time, location, assignedRule]);
+  }, [name, pick, date, time, location, assignedRule, userNote]);
 
   const dodge = () => {
     setNoPos({
@@ -253,10 +255,11 @@ function DatingApp() {
 
     setLocation(assignedLocation);
 
-    const randomRule =
-      assignedRule ||
+    const typedNote = userNote.trim();
+    const finalRule =
+      typedNote ||
       DATE_DESTROYING_RULES[Math.floor(Math.random() * DATE_DESTROYING_RULES.length)];
-    setAssignedRule(randomRule);
+    setAssignedRule(finalRule);
 
     try {
       await submitRsvp({
@@ -267,7 +270,7 @@ function DatingApp() {
           time_slot: time,
           location_url: assignedLocation.url,
           location_name: assignedLocation.label,
-          user_note: randomRule,
+          user_note: finalRule,
         },
       });
     } catch (error) {
@@ -608,6 +611,49 @@ function DatingApp() {
                     oh and dress something nice
                   </p>
                 </div>
+
+                <div className="note-card p-3.5 bg-white border-2 border-black rotate-[0.5deg] relative mt-1 space-y-2.5">
+                  <div className="tape-strip -top-2.5 left-8 -rotate-2" />
+                  <div className="flex items-center justify-between">
+                    <label className="font-handwriting text-xl text-blue-900 font-bold block">
+                      leave a note for me (optional):
+                    </label>
+                    <span className="font-handwriting text-sm text-black/50">quick picks</span>
+                  </div>
+
+                  <div className="flex flex-wrap gap-1.5">
+                    {[
+                      "Don't be late",
+                      "No talking about your ex",
+                      "Must laugh at my jokes",
+                      "No acoustic guitars",
+                      "Do not invite your mom",
+                      "No chewing with open mouth",
+                    ].map((preset) => (
+                      <button
+                        key={preset}
+                        type="button"
+                        onClick={() => setUserNote(preset)}
+                        className={cn(
+                          "px-3 py-1 rounded-full border text-base font-handwriting transition-all",
+                          userNote === preset
+                            ? "bg-yellow-300 border-black font-bold text-black shadow-xs scale-105"
+                            : "bg-yellow-50/90 border-black/30 text-blue-900 hover:border-black hover:bg-yellow-100"
+                        )}
+                      >
+                        {preset}
+                      </button>
+                    ))}
+                  </div>
+
+                  <textarea
+                    value={userNote}
+                    onChange={(e) => setUserNote(e.target.value)}
+                    placeholder="or write your own note or rule for our date..."
+                    rows={2}
+                    className="w-full bg-yellow-50/70 border-2 border-dashed border-blue-900/40 rounded-lg p-2.5 text-lg font-handwriting text-blue-950 font-semibold focus:outline-none focus:border-black placeholder:text-blue-900/40 resize-none leading-tight"
+                  />
+                </div>
               </div>
             )}
 
@@ -721,6 +767,7 @@ function DatingApp() {
                   setDate(undefined);
                   setTime(null);
                   setLocation(null);
+                  setUserNote("");
                   setAssignedRule("");
                   window.history.replaceState({}, "", window.location.pathname);
                 }}
