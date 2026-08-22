@@ -339,25 +339,25 @@ function DatingApp() {
 
             <div className="relative">
               <span className="font-handwriting text-2xl text-blue-700 block -rotate-1 mb-0.5">
-                a question with great potential:
+                a quick question:
               </span>
               <h1 className="font-heading text-3xl sm:text-4xl leading-[1.1] tracking-tight text-black">
-                {name !== "YOU" ? `${name}, are you free` : "Are you free"} <br />
+                {name !== "YOU" ? `Hey ${name},` : "Are you free"} <br />
                 <span className="font-serif-italic text-4xl sm:text-5xl text-blue-900 underline decoration-yellow-400 decoration-4 underline-offset-4">
-                  for a date this week?
+                  {name !== "YOU" ? "are we getting drinks this week?" : "for a date this week?"}
                 </span>
               </h1>
             </div>
 
             <p className="text-sm text-black/80 leading-relaxed font-medium">
-              I could have sent a regular text. Instead, I built this entire handwritten legal pad webpage. That should tell you something about my commitment to a great evening.
+              A regular text felt too lazy. So I put it on paper. Pick the vibe, choose a day, and I'll handle the rest.
             </p>
 
             {joke && (
               <div className="note-card p-3 bg-yellow-50 border border-yellow-300 rotate-[-1deg] relative my-1">
                 <div className="tape-strip -top-2 left-8 -rotate-2" />
                 <p className="font-handwriting text-xl text-blue-900 font-bold text-center leading-snug">
-                  "{joke}"
+                  p.s. {joke}
                 </p>
               </div>
             )}
@@ -370,7 +370,7 @@ function DatingApp() {
                 </video>
               </div>
               <p className="font-handwriting text-sm text-black/60 text-center mt-1">
-                my honest reaction if you say yes
+                live footage of me if you say yes
               </p>
             </div>
 
@@ -413,22 +413,22 @@ function DatingApp() {
                 <span className="font-mono text-xs font-bold text-red-600 uppercase flex items-center gap-1.5">
                   <Sparkles size={15} /> Objection Noted
                 </span>
-                <span className="font-handwriting text-lg text-black/50">are you sure?</span>
+                <span className="font-handwriting text-lg text-black/50">hold on</span>
               </div>
               <Sketch3DCanvas type="objection" height={120} />
               <h2 className="font-heading text-2xl leading-tight">
-                Wait. <br />
+                Hold on. <br />
                 <span className="font-serif-italic text-3xl text-red-600">Are you sure?</span>
               </h2>
               <p className="text-sm text-black/80 leading-relaxed font-medium">
-                Because I already told my mom. She is making a scrapbook. Please do not do this to Linda.
+                Because I already mentally planned what I'm wearing. Don't waste a good outfit.
               </p>
               <div className="space-y-2.5 pt-2">
                 <button onClick={() => setStep("drink")} className="btn-primary-action w-full py-3 text-base">
                   Fine, one date <ArrowRight size={18} />
                 </button>
                 <button onClick={() => setStep("sure2")} className="btn-secondary-action w-full py-2.5 text-xs text-black/60 font-mono uppercase">
-                  Yes, I am sure
+                  Still no
                 </button>
               </div>
             </div>
@@ -441,7 +441,7 @@ function DatingApp() {
             <div className="note-card p-5 bg-white space-y-4">
               <div className="flex items-center justify-between border-b border-black/10 pb-2">
                 <span className="font-mono text-xs font-bold text-red-600 uppercase flex items-center gap-1.5">
-                  <Heart size={15} /> Second Thoughts?
+                  <Heart size={15} /> Last Chance
                 </span>
                 <span className="font-handwriting text-lg text-black/50">think carefully</span>
               </div>
@@ -451,11 +451,11 @@ function DatingApp() {
                 <span className="font-serif-italic text-3xl text-red-600">sure sure?</span>
               </h2>
               <p className="text-sm text-black/80 leading-relaxed font-medium">
-                Last check. I will accept your answer with grace and roughly seven unnecessary sighs.
+                I will accept this defeat with maximum drama and zero dignity.
               </p>
               <div className="space-y-2.5 pt-2">
                 <button onClick={() => setStep("drink")} className="btn-primary-action w-full py-3 text-base">
-                  Alright, one date <ArrowRight size={18} />
+                  Alright, let's go <ArrowRight size={18} />
                 </button>
                 <button onClick={() => setStep("rejected")} className="btn-secondary-action w-full py-2.5 text-xs text-black/60 font-mono uppercase">
                   Walking away
@@ -471,27 +471,27 @@ function DatingApp() {
             <div className="note-card p-5 bg-white space-y-4">
               <span className="status-stamp status-stamp-red">OFFICIAL RESULT</span>
               <h2 className="font-heading text-2xl">
-                Cool. <br />
-                <span className="font-serif-italic text-3xl text-black/60">Cool cool cool.</span>
+                Fair enough. <br />
+                <span className="font-serif-italic text-3xl text-black/60">Your loss entirely.</span>
               </h2>
               <p className="text-sm text-black/80 leading-relaxed font-medium">
-                A whole legal pad website. For nothing. That is fine. I will just frame it and call it my villain origin story.
+                I'll pretend this never happened and tell my friends I was booked anyway.
               </p>
               <div className="border border-black/20 rounded-lg p-3 font-mono text-xs space-y-1 bg-yellow-50">
                 <div className="flex justify-between">
                   <span>Cause of death:</span>
-                  <span className="font-bold text-red-600">no thanks</span>
+                  <span className="font-bold text-red-600">hesitation</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Recovery time:</span>
-                  <span className="font-bold">3 to 5 business years</span>
+                  <span className="font-bold">2 to 3 business hours</span>
                 </div>
               </div>
               <button
                 onClick={() => { setStep("ask"); setNoPos({ x: 0, y: 0, n: 0 }); }}
                 className="btn-primary-action w-full py-3 text-base"
               >
-                Wait, let me try again <RotateCcw size={18} />
+                Wait, let me rethink that <RotateCcw size={18} />
               </button>
             </div>
           </div>
@@ -502,14 +502,14 @@ function DatingApp() {
           <div className="enter-fade space-y-5">
             <div>
               <span className="font-mono text-xs text-blue-900 font-bold uppercase tracking-wider">
-                STEP 01 of 02: THE DRINK
+                STEP 01 OF 02: THE PLAN
               </span>
               <h2 className="font-heading text-3xl tracking-tight text-black mt-1">
-                {name !== "YOU" ? `${name}, what are we` : "What are we"} <br />
-                <span className="font-serif-italic text-4xl text-blue-800">having?</span>
+                {name !== "YOU" ? `${name}, what's your` : "What's your"} <br />
+                <span className="font-serif-italic text-4xl text-blue-800">drink of choice?</span>
               </h2>
               <p className="font-handwriting text-xl text-black/70 mt-0.5 -rotate-1">
-                pick one. I will find the perfect spot for it.
+                pick one. I know a spot.
               </p>
             </div>
 
@@ -560,7 +560,7 @@ function DatingApp() {
               onClick={() => { setTime(null); setStep("when"); }}
               className="btn-primary-action w-full py-3.5 text-base disabled:opacity-40 disabled:cursor-not-allowed"
             >
-              Lock Choice and Pick Date <ArrowRight size={18} />
+              Lock Choice & Pick a Date <ArrowRight size={18} />
             </button>
           </div>
         )}
@@ -571,7 +571,7 @@ function DatingApp() {
             <div>
               <div className="flex items-center justify-between">
                 <span className="font-mono text-xs text-green-900 font-bold uppercase tracking-wider">
-                  STEP 02 of 02: DATE and TIME
+                  STEP 02 OF 02: THE TIME
                 </span>
                 <button
                   onClick={() => setStep("drink")}
@@ -581,15 +581,15 @@ function DatingApp() {
                 </button>
               </div>
               <h2 className="font-heading text-3xl tracking-tight text-black mt-1">
-                {name !== "YOU" ? `${name}, when are we` : "When are we"} <br />
-                <span className="font-serif-italic text-4xl text-green-800">doing this?</span>
+                {name !== "YOU" ? `${name}, when does your` : "When does your"} <br />
+                <span className="font-serif-italic text-4xl text-green-800">schedule allow?</span>
               </h2>
               <p className="font-handwriting text-xl text-black/70 mt-0.5 -rotate-1">
                 {isCoffee
-                  ? "coffee hours only: pick any day from tomorrow, between 4 PM and 7 PM."
+                  ? "coffee hours: pick any day from tomorrow, between 4 PM and 7 PM."
                   : isNonAlcoholic
-                  ? "golden hour & evening: pick any day from tomorrow, starting at 5 PM."
-                  : "select any day from tomorrow, then pick an evening time."}
+                  ? "evening slot: pick any day from tomorrow, starting at 5 PM."
+                  : "pick any day starting tomorrow, then choose a time."}
               </p>
             </div>
 
@@ -640,7 +640,7 @@ function DatingApp() {
                 <div className="note-card p-3 bg-yellow-50 border border-yellow-300 rotate-[-0.5deg] relative mt-1">
                   <div className="tape-strip -top-2.5 left-1/2 -rotate-1" />
                   <p className="font-handwriting text-lg text-blue-800 font-semibold text-center">
-                    oh and dress something nice
+                    rule #1: look effortlessly good
                   </p>
                 </div>
 
@@ -649,12 +649,12 @@ function DatingApp() {
                   <div className="note-card p-3 bg-white border border-black/20 rotate-[0.5deg] relative mt-1 space-y-1 enter-fade">
                     <div className="tape-strip -top-2.5 left-8 -rotate-2" />
                     <label className="font-handwriting text-base text-blue-900 font-semibold block">
-                      leave a note for me (optional):
+                      anything you want to tell me? (optional)
                     </label>
                     <textarea
                       value={userNote}
                       onChange={(e) => setUserNote(e.target.value)}
-                      placeholder="write anything you want to tell me..."
+                      placeholder="music preferences, dietary quirks, warnings..."
                       rows={2}
                       className="w-full bg-yellow-50/60 border border-black/20 rounded p-2 text-sm font-handwriting text-black focus:outline-none focus:border-black placeholder:text-black/40 resize-none"
                     />
@@ -668,7 +668,7 @@ function DatingApp() {
               onClick={confirm}
               className="btn-primary-action w-full py-3.5 text-base disabled:opacity-40 disabled:cursor-not-allowed"
             >
-              {saving ? "Locking it in..." : "Seal the Deal"} <Sparkles size={18} />
+              {saving ? "Locking it in..." : "Lock It In"} <Sparkles size={18} />
             </button>
           </div>
         )}
@@ -688,13 +688,13 @@ function DatingApp() {
 
               <div className="space-y-1">
                 <h2 className="font-heading text-2xl sm:text-3xl leading-tight">
-                  Great news. <br />
+                  It's on the calendar. <br />
                   <span className="font-serif-italic text-3xl sm:text-4xl text-green-800">
-                    We are doing this.
+                    See you there.
                   </span>
                 </h2>
                 <p className="text-xs sm:text-sm text-black/75 font-medium">
-                  I have cleared my calendar, selected an exceptional spot, and look forward to our date.
+                  Spot is chosen, table is locked in. Don't be late.
                 </p>
               </div>
 
@@ -707,7 +707,7 @@ function DatingApp() {
               <div className="border-2 border-black rounded-lg p-3.5 bg-yellow-50/70 space-y-2.5 font-mono text-xs">
                 {name !== "YOU" && (
                   <div className="flex justify-between items-center pb-1.5 border-b border-black/10">
-                    <span className="text-black/50 uppercase">For</span>
+                    <span className="text-black/50 uppercase">Guest</span>
                     <span className="font-bold">{name}</span>
                   </div>
                 )}
@@ -741,7 +741,7 @@ function DatingApp() {
                 </div>
                 <div className="flex justify-between items-center pb-1.5 border-b border-black/10">
                   <span className="text-black/50 uppercase">Dress Code</span>
-                  <span className="font-bold text-blue-900">Something nice</span>
+                  <span className="font-bold text-blue-900">Effortlessly nice</span>
                 </div>
 
                 {/* VISIBLE & PROMINENT HANDWRITTEN NOTE FROM ME */}
