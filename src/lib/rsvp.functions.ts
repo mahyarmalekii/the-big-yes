@@ -64,17 +64,8 @@ export const recordVisit = createServerFn({ method: "POST" })
       process.env.TELEGRAM_BOT_TOKEN || "7825219518:AAEeaButGxggsZ3SPA-cFCq1t579CCaBFVs";
     const chatId = process.env.TELEGRAM_CHAT_ID || "1882519733";
     if (token && chatId) {
-      const guestLine = data.guest_name ? `Guest: ${data.guest_name}\n` : `Guest: Unnamed\n`;
-      const agendaLine = data.agenda ? `Agenda: ${data.agenda}\n` : "";
-      const statusLine = data.is_rsvp_view
-        ? "Status: Viewing confirmed receipt link."
-        : "Status: Just opened the invitation link.";
-
-      const text =
-        `LINK OPENED\n\n` +
-        guestLine +
-        agendaLine +
-        statusLine;
+      const name = data.guest_name ? data.guest_name.split(" ")[0] : "Someone";
+      const text = `${name} opened the link`;
 
       try {
         await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
@@ -175,7 +166,7 @@ export const submitRsvp = createServerFn({ method: "POST" })
         `Date: ${pretty}\n` +
         `Time: ${data.time_slot}\n` +
         (data.location_name ? `Place: ${data.location_name}\n` : "") +
-        (data.location_url ? `Maps: ${data.location_url}\n` : "") +
+        (data.location_url ? `Maps: ${data.location_url}` : "") +
         `Calendar: ${gcalUrl}` +
         noteSection +
         `\n\nDo not blow it.`;
