@@ -256,10 +256,9 @@ function DatingApp() {
     setLocation(assignedLocation);
 
     const typedNote = userNote.trim();
-    const finalRule =
-      typedNote ||
+    const randomRule =
       DATE_DESTROYING_RULES[Math.floor(Math.random() * DATE_DESTROYING_RULES.length)];
-    setAssignedRule(finalRule);
+    setAssignedRule(randomRule);
 
     try {
       await submitRsvp({
@@ -270,7 +269,7 @@ function DatingApp() {
           time_slot: time,
           location_url: assignedLocation.url,
           location_name: assignedLocation.label,
-          user_note: finalRule,
+          user_note: typedNote || undefined,
         },
       });
     } catch (error) {
@@ -612,46 +611,17 @@ function DatingApp() {
                   </p>
                 </div>
 
-                <div className="note-card p-3.5 bg-white border-2 border-black rotate-[0.5deg] relative mt-1 space-y-2.5">
+                <div className="note-card p-3 bg-white border border-black/20 rotate-[0.5deg] relative mt-1 space-y-1">
                   <div className="tape-strip -top-2.5 left-8 -rotate-2" />
-                  <div className="flex items-center justify-between">
-                    <label className="font-handwriting text-xl text-blue-900 font-bold block">
-                      leave a note for me (optional):
-                    </label>
-                    <span className="font-handwriting text-sm text-black/50">quick picks</span>
-                  </div>
-
-                  <div className="flex flex-wrap gap-1.5">
-                    {[
-                      "Don't be late",
-                      "No talking about your ex",
-                      "Must laugh at my jokes",
-                      "No acoustic guitars",
-                      "Do not invite your mom",
-                      "No chewing with open mouth",
-                    ].map((preset) => (
-                      <button
-                        key={preset}
-                        type="button"
-                        onClick={() => setUserNote(preset)}
-                        className={cn(
-                          "px-3 py-1 rounded-full border text-base font-handwriting transition-all",
-                          userNote === preset
-                            ? "bg-yellow-300 border-black font-bold text-black shadow-xs scale-105"
-                            : "bg-yellow-50/90 border-black/30 text-blue-900 hover:border-black hover:bg-yellow-100"
-                        )}
-                      >
-                        {preset}
-                      </button>
-                    ))}
-                  </div>
-
+                  <label className="font-handwriting text-base text-blue-900 font-semibold block">
+                    leave a note for me (optional):
+                  </label>
                   <textarea
                     value={userNote}
                     onChange={(e) => setUserNote(e.target.value)}
-                    placeholder="or write your own note or rule for our date..."
+                    placeholder="write anything you want to tell me..."
                     rows={2}
-                    className="w-full bg-yellow-50/70 border-2 border-dashed border-blue-900/40 rounded-lg p-2.5 text-lg font-handwriting text-blue-950 font-semibold focus:outline-none focus:border-black placeholder:text-blue-900/40 resize-none leading-tight"
+                    className="w-full bg-yellow-50/60 border border-black/20 rounded p-2 text-sm font-handwriting text-black focus:outline-none focus:border-black placeholder:text-black/40 resize-none"
                   />
                 </div>
               </div>
@@ -724,11 +694,11 @@ function DatingApp() {
                   <span className="font-bold text-blue-900">Something nice</span>
                 </div>
 
-                {/* VISIBLE & PROMINENT HANDWRITTEN DATE-DESTROYING RULE */}
+                {/* VISIBLE & PROMINENT HANDWRITTEN NOTE FROM ME */}
                 <div className="mt-2 bg-white/95 border-2 border-black rounded-lg p-3 space-y-1 relative rotate-[-0.5deg] shadow-sm">
                   <div className="tape-strip -top-2.5 left-6 -rotate-2" />
                   <span className="font-handwriting text-sm text-red-600 font-bold block uppercase tracking-wide">
-                    date-destroying rule (non-negotiable):
+                    a note from me:
                   </span>
                   <p className="font-handwriting text-2xl text-blue-900 leading-snug font-bold">
                     "{assignedRule || "Don't be late"}"
