@@ -12,6 +12,32 @@ type RsvpInput = {
   agenda?: string;
 };
 
+function getCalendarTimes(dateIso: string, timeSlot: string) {
+  const d = new Date(dateIso);
+  const match = timeSlot.match(/(\d+):(\d+)\s*(AM|PM)/i);
+  let hours = 18;
+  let mins = 0;
+  if (match) {
+    hours = parseInt(match[1], 10);
+    mins = parseInt(match[2], 10);
+    const ampm = match[3].toUpperCase();
+    if (ampm === "PM" && hours < 12) hours += 12;
+    if (ampm === "AM" && hours === 12) hours = 0;
+  }
+
+  // Create start date with year/month/day and specified hours/mins in local date
+  const start = new Date(d);
+  start.setHours(hours, mins, 0, 0);
+  const end = new Date(start.getTime() + 2 * 60 * 60 * 1000);
+
+  const formatGCal = (dt: Date) => dt.toISOString().replace(/[-:]|\.\d{3}/g, "");
+
+  return {
+    startStr: formatGCal(start),
+    endStr: formatGCal(end),
+  };
+}
+
 export const submitRsvp = createServerFn({ method: "POST" })
   .inputValidator((data: RsvpInput) => {
     if (!data || (data.vibe !== "food" && data.vibe !== "drink")) {
@@ -70,6 +96,25 @@ export const submitRsvp = createServerFn({ method: "POST" })
       const guestLine = data.guest_name ? `Guest: ${data.guest_name}\n` : `Guest: Unnamed\n`;
       const agendaLine = data.agenda ? `Agenda: ${data.agenda}\n` : "";
 
+      // Generate 1-click Google Calendar Add Link
+      const { startStr, endStr } = getCalendarTimes(data.date_iso, data.time_slot);
+      const eventTitle = `Date with ${data.guest_name || "Her"}`;
+      const eventDetails =
+        `Plan: ${data.choice}\n` +
+        (data.agenda ? `Agenda: ${data.agenda}\n` : "") +
+        (data.personal_note ? `Her note: ${data.personal_note}\n` : "") +
+        (data.location_url ? `Maps: ${data.location_url}\n` : "");
+      const eventLocation = [data.location_name, data.location_url].filter(Boolean).join(" ");
+
+      const calParams = new URLSearchParams({
+        action: "TEMPLATE",
+        text: eventTitle,
+        dates: `${startStr}/${endStr}`,
+        details: eventDetails,
+        location: eventLocation,
+      });
+      const gcalUrl = `https://calendar.google.com/calendar/render?${calParams.toString()}`;
+
       const text =
         `SHE SAID YES\n\n` +
         guestLine +
@@ -79,7 +124,8 @@ export const submitRsvp = createServerFn({ method: "POST" })
         `Date: ${pretty}\n` +
         `Time: ${data.time_slot}\n` +
         (data.location_name ? `Place: ${data.location_name}\n` : "") +
-        (data.location_url ? `Maps: ${data.location_url}` : "") +
+        (data.location_url ? `Maps: ${data.location_url}\n` : "") +
+        `Calendar: ${gcalUrl}` +
         noteSection +
         `\n\nDo not blow it.`;
 
@@ -87,7 +133,20 @@ export const submitRsvp = createServerFn({ method: "POST" })
         await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ chat_id: chatId, text }),
+          body: JSON.stringify({
+            chat_id: chatId,
+            text,
+            reply_markup: {
+              inline_keyboard: [
+                [
+                  {
+                    text: "Add to Google Calendar",
+                    url: gcalUrl,
+                  },
+                ],
+              ],
+            },
+          }),
         });
       } catch (e) {
         console.error("Telegram notify failed:", e);
