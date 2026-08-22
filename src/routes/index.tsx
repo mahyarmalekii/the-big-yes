@@ -162,6 +162,7 @@ function DatingApp() {
   const [date, setDate] = useState<Date | undefined>();
   const [time, setTime] = useState<string | null>(null);
   const [location, setLocation] = useState<LocationPick | null>(null);
+  const [userNote, setUserNote] = useState("");
   const [noPos, setNoPos] = useState({ x: 0, y: 0, n: 0 });
   const [copied, setCopied] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -242,6 +243,7 @@ function DatingApp() {
           time_slot: time,
           location_url: assignedLocation.url,
           location_name: assignedLocation.label,
+          user_note: userNote.trim() || undefined,
         },
       });
     } catch (error) {
@@ -582,6 +584,20 @@ function DatingApp() {
                     oh and dress something nice
                   </p>
                 </div>
+
+                <div className="note-card p-3 bg-white border border-black/20 rotate-[0.5deg] relative mt-1 space-y-1">
+                  <div className="tape-strip -top-2.5 left-8 -rotate-2" />
+                  <label className="font-handwriting text-base text-blue-900 font-semibold block">
+                    a note for me (optional):
+                  </label>
+                  <textarea
+                    value={userNote}
+                    onChange={(e) => setUserNote(e.target.value)}
+                    placeholder="e.g. don't be late, special requests, or secret code words..."
+                    rows={2}
+                    className="w-full bg-yellow-50/60 border border-black/20 rounded p-2 text-xs font-handwriting text-black focus:outline-none focus:border-black placeholder:text-black/40 resize-none"
+                  />
+                </div>
               </div>
             )}
 
@@ -647,6 +663,14 @@ function DatingApp() {
                     {location?.label ?? "Curated Spot"}
                   </span>
                 </div>
+                {userNote && (
+                  <div className="flex justify-between items-start pb-1.5 border-b border-black/10">
+                    <span className="text-black/50 uppercase">Note</span>
+                    <span className="font-bold text-right truncate max-w-[190px] font-handwriting text-blue-900">
+                      "{userNote}"
+                    </span>
+                  </div>
+                )}
                 <div className="flex justify-between items-center">
                   <span className="text-black/50 uppercase">Dress Code</span>
                   <span className="font-bold text-blue-900">Something nice</span>
@@ -684,6 +708,7 @@ function DatingApp() {
                   setDate(undefined);
                   setTime(null);
                   setLocation(null);
+                  setUserNote("");
                   window.history.replaceState({}, "", window.location.pathname);
                 }}
                 className="text-center w-full font-mono text-xs text-black/40 hover:text-black py-1"

@@ -92,19 +92,43 @@ export const Diorama3D: React.FC<Diorama3DProps> = ({
       (err) => console.warn("Error loading clay diorama:", err)
     );
 
-    // 4. Subtle Mouse Parallax
-    let targetRotY = 0;
-    let targetRotX = 0;
+    // 4. Smooth Touch & Pointer Drag Orbiting for Mobile and Desktop
+    let isDragging = false;
+    let previousPointerPosition = { x: 0, y: 0 };
+    let dragRotY = 0;
+    let dragRotX = 0;
+    let hoverRotY = 0;
+    let hoverRotX = 0;
 
-    const handleMouseMove = (e: MouseEvent) => {
-      const rect = container.getBoundingClientRect();
-      const x = ((e.clientX - rect.left) / rect.width - 0.5) * 2;
-      const y = ((e.clientY - rect.top) / rect.height - 0.5) * 2;
-      targetRotY = x * 0.35;
-      targetRotX = -y * 0.15;
+    const onPointerDown = (e: PointerEvent) => {
+      isDragging = true;
+      previousPointerPosition = { x: e.clientX, y: e.clientY };
     };
 
-    window.addEventListener("mousemove", handleMouseMove);
+    const onPointerMove = (e: PointerEvent) => {
+      if (isDragging) {
+        const deltaX = e.clientX - previousPointerPosition.x;
+        const deltaY = e.clientY - previousPointerPosition.y;
+        dragRotY += deltaX * 0.01;
+        dragRotX = Math.max(-0.5, Math.min(0.5, dragRotX + deltaY * 0.008));
+        previousPointerPosition = { x: e.clientX, y: e.clientY };
+      } else {
+        const rect = container.getBoundingClientRect();
+        const x = ((e.clientX - rect.left) / rect.width - 0.5) * 2;
+        const y = ((e.clientY - rect.top) / rect.height - 0.5) * 2;
+        hoverRotY = x * 0.25;
+        hoverRotX = -y * 0.12;
+      }
+    };
+
+    const onPointerUp = () => {
+      isDragging = false;
+    };
+
+    container.addEventListener("pointerdown", onPointerDown);
+    window.addEventListener("pointermove", onPointerMove);
+    window.addEventListener("pointerup", onPointerUp);
+    window.addEventListener("pointercancel", onPointerUp);
 
     // 5. Animation Loop
     let animationFrameId: number;
@@ -118,9 +142,11 @@ export const Diorama3D: React.FC<Diorama3DProps> = ({
 
       if (mixer) mixer.update(delta);
 
-      // Smooth parallax
-      dioramaGroup.rotation.y += (targetRotY - dioramaGroup.rotation.y) * 0.06;
-      dioramaGroup.rotation.x += (targetRotX - dioramaGroup.rotation.x) * 0.06;
+      // Smooth parallax & touch orbit
+      const targetY = dragRotY + hoverRotY;
+      const targetX = dragRotX + hoverRotX;
+      dioramaGroup.rotation.y += (targetY - dioramaGroup.rotation.y) * 0.08;
+      dioramaGroup.rotation.x += (targetX - dioramaGroup.rotation.x) * 0.08;
 
       // Dynamic Highlighting pulse
       if (dioramaGroup) {
@@ -153,7 +179,10 @@ export const Diorama3D: React.FC<Diorama3DProps> = ({
     window.addEventListener("resize", handleResize);
 
     return () => {
-      window.removeEventListener("mousemove", handleMouseMove);
+      container.removeEventListener("pointerdown", onPointerDown);
+      window.removeEventListener("pointermove", onPointerMove);
+      window.removeEventListener("pointerup", onPointerUp);
+      window.removeEventListener("pointercancel", onPointerUp);
       window.removeEventListener("resize", handleResize);
       cancelAnimationFrame(animationFrameId);
       renderer.dispose();
@@ -166,7 +195,7 @@ export const Diorama3D: React.FC<Diorama3DProps> = ({
   return (
     <div
       ref={containerRef}
-      className={`w-full flex items-center justify-center relative cursor-grab active:cursor-grabbing select-none rounded-xl overflow-hidden ${className}`}
+      className={`w-full flex items-center justify-center relative cursor-grab active:cursor-grabbing select-none rounded-xl overflow-hidden touch-none ${className}`}
       style={{ height }}
     >
       {!loaded && (
