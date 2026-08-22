@@ -119,7 +119,6 @@ const DRINK_OPTIONS: {
   label: string;
   sub: string;
   Icon: LucideIcon;
-  note?: string;
   color: string;
 }[] = [
   {
@@ -127,7 +126,6 @@ const DRINK_OPTIONS: {
     label: "Beer",
     sub: "Two cold beers and pretending we have our lives together",
     Icon: Beer,
-    note: "Honest and zero pretension",
     color: "bg-yellow-100 text-yellow-900",
   },
   {
@@ -135,13 +133,12 @@ const DRINK_OPTIONS: {
     label: "Wine",
     sub: "Two glasses in and we will tell our whole life story",
     Icon: Wine,
-    note: "Classy until the second bottle",
     color: "bg-purple-100 text-purple-900",
   },
   {
     id: "cocktail",
     label: "Non Alcoholic Drink",
-    sub: "Fancy mocktails so we look cool and stay sharp",
+    sub: "Fancy mocktails so we stay sharp, sleep well, and crush work tomorrow",
     Icon: CupSoda,
     color: "bg-teal-100 text-teal-900",
   },
@@ -150,7 +147,6 @@ const DRINK_OPTIONS: {
     label: "Coffee",
     sub: "A quick coffee that secretly turns into a three hour talk",
     Icon: Coffee,
-    note: "Low key and dangerous",
     color: "bg-amber-100 text-amber-900",
   },
 ];
@@ -465,7 +461,7 @@ function DatingApp() {
             </div>
 
             <div className="grid gap-3">
-              {DRINK_OPTIONS.map(({ id, label, sub, Icon, note, color }) => {
+              {DRINK_OPTIONS.map(({ id, label, sub, Icon, color }) => {
                 const selected = pick === id;
                 return (
                   <TiltCard
@@ -486,11 +482,6 @@ function DatingApp() {
                       <div className="flex-1">
                         <span className="font-heading text-base block">{label}</span>
                         <p className="text-xs text-black/70 mt-0.5">{sub}</p>
-                        {note && (
-                          <p className="font-handwriting text-sm text-blue-700 mt-1 font-semibold">
-                            {note}
-                          </p>
-                        )}
                       </div>
                       {selected && (
                         <div className="self-center p-1 rounded-full bg-black text-white">
