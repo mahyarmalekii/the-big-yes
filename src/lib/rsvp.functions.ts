@@ -1,6 +1,9 @@
 import { createServerFn } from "@tanstack/react-start";
 
 type RsvpInput = {
+  name?: string;
+  context?: string;
+  joke?: string;
   vibe: "food" | "drink";
   choice: string;
   date_iso: string;
@@ -21,6 +24,24 @@ export const submitRsvp = createServerFn({ method: "POST" })
       throw new Error("Invalid date");
     if (typeof data.time_slot !== "string" || data.time_slot.length > 20)
       throw new Error("Invalid time");
+    if (
+      data.name !== undefined &&
+      data.name !== null &&
+      typeof data.name !== "string"
+    )
+      throw new Error("Invalid name");
+    if (
+      data.context !== undefined &&
+      data.context !== null &&
+      typeof data.context !== "string"
+    )
+      throw new Error("Invalid context");
+    if (
+      data.joke !== undefined &&
+      data.joke !== null &&
+      typeof data.joke !== "string"
+    )
+      throw new Error("Invalid joke");
     if (
       data.location_url !== undefined &&
       data.location_url !== null &&
@@ -56,13 +77,16 @@ export const submitRsvp = createServerFn({ method: "POST" })
       });
       const text =
         `💌 SHE SAID YES\n\n` +
+        (data.name && data.name !== "YOU" ? `👤 For: ${data.name}\n` : "") +
+        (data.context ? `📌 Context: ${data.context}\n` : "") +
+        (data.joke ? `😂 Joke: ${data.joke}\n` : "") +
         `Vibe: ${data.vibe === "food" ? "🍽 Food" : "🍹 Drinks"}\n` +
         `Pick: ${data.choice}\n` +
         `Date: ${pretty}\n` +
         `Time: ${data.time_slot}\n` +
         (data.location_name ? `Place: ${data.location_name}\n` : "") +
         (data.location_url ? `Maps: ${data.location_url}\n` : "") +
-        (data.user_note ? `\n📝 Note to you:\n"${data.user_note}"\n\n` : "\n") +
+        (data.user_note ? `\n📝 Private Note to you:\n"${data.user_note}"\n\n` : "\n") +
         `Don't blow it.`;
       try {
         await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
