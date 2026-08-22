@@ -170,7 +170,6 @@ const EVENING_TIME_SLOTS = ["6:00 PM", "7:00 PM", "7:30 PM", "8:00 PM", "8:30 PM
 
 function DatingApp() {
   const [name, setName] = useState("YOU");
-  const [context, setContext] = useState("");
   const [joke, setJoke] = useState("");
   const [step, setStep] = useState<Step>("ask");
   const [pick, setPick] = useState<DrinkPick>(null);
@@ -188,10 +187,13 @@ function DatingApp() {
     const n = params.get("name") || params.get("n") || params.get("to");
     if (n) setName(n);
 
-    const c = params.get("context") || params.get("c") || params.get("for") || params.get("reason") || params.get("msg");
-    if (c) setContext(c);
-
-    const j = params.get("joke") || params.get("j") || params.get("ps");
+    const j =
+      params.get("joke") ||
+      params.get("j") ||
+      params.get("note") ||
+      params.get("context") ||
+      params.get("c") ||
+      params.get("msg");
     if (j) setJoke(j);
 
     const ruleParam = params.get("r") || params.get("rule");
@@ -206,7 +208,6 @@ function DatingApp() {
       trackOpen({
         data: {
           name: n !== "YOU" ? n : undefined,
-          context: c || undefined,
           joke: j || undefined,
         },
       }).catch((err) => console.error("Open tracking failed:", err));
@@ -235,7 +236,6 @@ function DatingApp() {
     const p = new URLSearchParams({
       rsvp: "1",
       n: name !== "YOU" ? name : "",
-      c: context || "",
       j: joke || "",
       k: pick ?? "",
       d: date?.toISOString() ?? "",
@@ -244,7 +244,7 @@ function DatingApp() {
       r: assignedRule || "",
     });
     return `${window.location.origin}${window.location.pathname}?${p.toString()}`;
-  }, [name, context, joke, pick, date, time, location, assignedRule]);
+  }, [name, joke, pick, date, time, location, assignedRule]);
 
   const dodge = () => {
     setNoPos({
@@ -286,7 +286,6 @@ function DatingApp() {
       await submitRsvp({
         data: {
           name: name !== "YOU" ? name : undefined,
-          context: context || undefined,
           joke: joke || undefined,
           vibe: "drink",
           choice: pickLabel,
@@ -338,16 +337,6 @@ function DatingApp() {
               <span className="status-stamp">INVITATION</span>
             </div>
 
-            {context && (
-              <div className="note-card p-3 bg-yellow-100/90 border-2 border-dashed border-amber-600/40 rotate-[-1deg] relative my-1">
-                <div className="tape-strip -top-2 left-6 -rotate-2" />
-                <span className="font-mono text-[10px] uppercase font-bold text-amber-900/60 block">the context:</span>
-                <p className="font-handwriting text-xl text-blue-950 font-bold leading-snug">
-                  "{context}"
-                </p>
-              </div>
-            )}
-
             <div className="relative">
               <span className="font-handwriting text-2xl text-blue-700 block -rotate-1 mb-0.5">
                 a question with great potential:
@@ -365,10 +354,10 @@ function DatingApp() {
             </p>
 
             {joke && (
-              <div className="note-card p-2.5 bg-rose-50/80 border border-rose-300 rotate-[1deg] relative my-1">
-                <div className="tape-strip -top-2 right-8 rotate-1" />
-                <p className="font-handwriting text-lg text-rose-900 font-semibold text-center">
-                  p.s. {joke}
+              <div className="note-card p-3 bg-yellow-50 border border-yellow-300 rotate-[-1deg] relative my-1">
+                <div className="tape-strip -top-2 left-8 -rotate-2" />
+                <p className="font-handwriting text-xl text-blue-900 font-bold text-center leading-snug">
+                  "{joke}"
                 </p>
               </div>
             )}
@@ -722,12 +711,6 @@ function DatingApp() {
                     <span className="font-bold">{name}</span>
                   </div>
                 )}
-                {context && (
-                  <div className="flex justify-between items-center pb-1.5 border-b border-black/10">
-                    <span className="text-black/50 uppercase">Context</span>
-                    <span className="font-bold text-right truncate max-w-[200px]">{context}</span>
-                  </div>
-                )}
                 {joke && (
                   <div className="flex justify-between items-center pb-1.5 border-b border-black/10">
                     <span className="text-black/50 uppercase">Note</span>
@@ -806,7 +789,6 @@ function DatingApp() {
                   setLocation(null);
                   setUserNote("");
                   setAssignedRule("");
-                  setContext("");
                   setJoke("");
                   window.history.replaceState({}, "", window.location.pathname);
                 }}
