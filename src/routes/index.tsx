@@ -296,7 +296,8 @@ function DatingApp() {
           location_url: assignedLocation.url,
           location_name: assignedLocation.label,
           personal_note: personalNote.trim() || undefined,
-          guest_name: displayName || undefined,
+          guest_name: displayName || (name !== "YOU" ? name : undefined),
+          agenda: joke || undefined,
         },
       });
     } catch (error) {
