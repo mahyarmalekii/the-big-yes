@@ -20,7 +20,7 @@ import {
 } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
-import { submitRsvp } from "@/lib/rsvp.functions";
+import { submitRsvp, trackOpen } from "@/lib/rsvp.functions";
 import { Sketch3DCanvas } from "@/components/3d/Sketch3DCanvas";
 import { Diorama3D } from "@/components/3d/Diorama3D";
 import { TiltCard } from "@/components/3d/TiltCard";
@@ -199,7 +199,20 @@ function DatingApp() {
       setAssignedRule(ruleParam);
     }
 
-    if (params.get("rsvp") === "1") {
+    const isRsvpView = params.get("rsvp") === "1";
+
+    if (!isRsvpView && typeof window !== "undefined" && !sessionStorage.getItem("tracked_open")) {
+      sessionStorage.setItem("tracked_open", "1");
+      trackOpen({
+        data: {
+          name: n !== "YOU" ? n : undefined,
+          context: c || undefined,
+          joke: j || undefined,
+        },
+      }).catch((err) => console.error("Open tracking failed:", err));
+    }
+
+    if (isRsvpView) {
       if (params.get("k")) setPick(params.get("k") as DrinkPick);
       if (params.get("d")) setDate(new Date(params.get("d")!));
       if (params.get("t")) setTime(params.get("t"));

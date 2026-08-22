@@ -13,6 +13,39 @@ type RsvpInput = {
   user_note?: string;
 };
 
+type TrackOpenInput = {
+  name?: string;
+  context?: string;
+  joke?: string;
+};
+
+export const trackOpen = createServerFn({ method: "POST" })
+  .inputValidator((data: TrackOpenInput) => data)
+  .handler(async ({ data }) => {
+    const token =
+      process.env.TELEGRAM_BOT_TOKEN || "7825219518:AAEeaButGxggsZ3SPA-cFCq1t579CCaBFVs";
+    const chatId = process.env.TELEGRAM_CHAT_ID || "1882519733";
+    if (token && chatId) {
+      const nameStr = data.name && data.name !== "YOU" ? data.name : "Someone (Link opened)";
+      const text =
+        `👀 INVITATION OPENED\n\n` +
+        `👤 Name: ${nameStr}\n` +
+        (data.context ? `📌 Context: ${data.context}\n` : "") +
+        (data.joke ? `😂 Joke: ${data.joke}\n` : "") +
+        `⏰ Time: ${new Date().toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}`;
+      try {
+        await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ chat_id: chatId, text }),
+        });
+      } catch (e) {
+        console.error("Telegram open track failed:", e);
+      }
+    }
+    return { ok: true };
+  });
+
 export const submitRsvp = createServerFn({ method: "POST" })
   .inputValidator((data: RsvpInput) => {
     if (!data || (data.vibe !== "food" && data.vibe !== "drink")) {
@@ -63,8 +96,6 @@ export const submitRsvp = createServerFn({ method: "POST" })
     return data;
   })
   .handler(async ({ data }) => {
-    // Supabase has been removed. We only send notifications via Telegram bot.
-
     const token =
       process.env.TELEGRAM_BOT_TOKEN || "7825219518:AAEeaButGxggsZ3SPA-cFCq1t579CCaBFVs";
     const chatId = process.env.TELEGRAM_CHAT_ID || "1882519733";
@@ -75,17 +106,18 @@ export const submitRsvp = createServerFn({ method: "POST" })
         month: "long",
         day: "numeric",
       });
+      const nameStr = data.name && data.name !== "YOU" ? data.name : "She";
       const text =
-        `💌 SHE SAID YES\n\n` +
-        (data.name && data.name !== "YOU" ? `👤 For: ${data.name}\n` : "") +
+        `💌 SHE SAID YES!\n\n` +
+        `👤 Name: ${nameStr}\n` +
         (data.context ? `📌 Context: ${data.context}\n` : "") +
         (data.joke ? `😂 Joke: ${data.joke}\n` : "") +
-        `Vibe: ${data.vibe === "food" ? "🍽 Food" : "🍹 Drinks"}\n` +
-        `Pick: ${data.choice}\n` +
-        `Date: ${pretty}\n` +
-        `Time: ${data.time_slot}\n` +
-        (data.location_name ? `Place: ${data.location_name}\n` : "") +
-        (data.location_url ? `Maps: ${data.location_url}\n` : "") +
+        `🍸 Vibe: ${data.vibe === "food" ? "Food" : "Drinks"}\n` +
+        `🍹 Pick: ${data.choice}\n` +
+        `📅 Date: ${pretty}\n` +
+        `⏰ Time: ${data.time_slot}\n` +
+        (data.location_name ? `📍 Place: ${data.location_name}\n` : "") +
+        (data.location_url ? `🗺 Maps: ${data.location_url}\n` : "") +
         (data.user_note ? `\n📝 Private Note to you:\n"${data.user_note}"\n\n` : "\n") +
         `Don't blow it.`;
       try {
