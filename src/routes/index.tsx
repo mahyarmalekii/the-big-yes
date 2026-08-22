@@ -151,7 +151,7 @@ const DRINK_OPTIONS: {
   },
 ];
 
-const FUNNY_ABSURD_NOTES = [
+const DATE_DESTROYING_RULES = [
   "Don't be late",
   "No talking about your ex",
   "You must laugh at at least two of my jokes",
@@ -175,8 +175,7 @@ function DatingApp() {
   const [date, setDate] = useState<Date | undefined>();
   const [time, setTime] = useState<string | null>(null);
   const [location, setLocation] = useState<LocationPick | null>(null);
-  const [userNote, setUserNote] = useState("");
-  const [displayNote, setDisplayNote] = useState("");
+  const [assignedRule, setAssignedRule] = useState("");
   const [noPos, setNoPos] = useState({ x: 0, y: 0, n: 0 });
   const [copied, setCopied] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -186,10 +185,9 @@ function DatingApp() {
     const n = params.get("n");
     if (n) setName(n);
 
-    const customContext = params.get("context") || params.get("note") || params.get("m") || params.get("msg");
-    if (customContext) {
-      setUserNote(customContext);
-      setDisplayNote(customContext);
+    const ruleParam = params.get("r") || params.get("m") || params.get("note");
+    if (ruleParam) {
+      setAssignedRule(ruleParam);
     }
 
     if (params.get("rsvp") === "1") {
@@ -219,10 +217,10 @@ function DatingApp() {
       d: date?.toISOString() ?? "",
       t: time ?? "",
       l: location?.url ?? "",
-      m: displayNote || userNote || "",
+      r: assignedRule || "",
     });
     return `${window.location.origin}${window.location.pathname}?${p.toString()}`;
-  }, [name, pick, date, time, location, displayNote, userNote]);
+  }, [name, pick, date, time, location, assignedRule]);
 
   const dodge = () => {
     setNoPos({
@@ -255,12 +253,10 @@ function DatingApp() {
 
     setLocation(assignedLocation);
 
-    const typedNote = userNote.trim();
-    let finalNote = typedNote;
-    if (!finalNote) {
-      finalNote = FUNNY_ABSURD_NOTES[Math.floor(Math.random() * FUNNY_ABSURD_NOTES.length)];
-    }
-    setDisplayNote(finalNote);
+    const randomRule =
+      assignedRule ||
+      DATE_DESTROYING_RULES[Math.floor(Math.random() * DATE_DESTROYING_RULES.length)];
+    setAssignedRule(randomRule);
 
     try {
       await submitRsvp({
@@ -271,7 +267,7 @@ function DatingApp() {
           time_slot: time,
           location_url: assignedLocation.url,
           location_name: assignedLocation.label,
-          user_note: typedNote || finalNote,
+          user_note: randomRule,
         },
       });
     } catch (error) {
@@ -612,49 +608,6 @@ function DatingApp() {
                     oh and dress something nice
                   </p>
                 </div>
-
-                <div className="note-card p-3.5 bg-white border-2 border-black rotate-[0.5deg] relative mt-1 space-y-2.5">
-                  <div className="tape-strip -top-2.5 left-8 -rotate-2" />
-                  <div className="flex items-center justify-between">
-                    <label className="font-handwriting text-xl text-blue-900 font-bold block">
-                      leave a note for me (optional):
-                    </label>
-                    <span className="font-handwriting text-sm text-black/50">quick picks</span>
-                  </div>
-
-                  <div className="flex flex-wrap gap-1.5">
-                    {[
-                      "Don't be late",
-                      "No talking about your ex",
-                      "Must laugh at my jokes",
-                      "No acoustic guitars",
-                      "Do not invite your mom",
-                      "No chewing with open mouth",
-                    ].map((preset) => (
-                      <button
-                        key={preset}
-                        type="button"
-                        onClick={() => setUserNote(preset)}
-                        className={cn(
-                          "px-3 py-1 rounded-full border text-base font-handwriting transition-all",
-                          userNote === preset
-                            ? "bg-yellow-300 border-black font-bold text-black shadow-xs scale-105"
-                            : "bg-yellow-50/90 border-black/30 text-blue-900 hover:border-black hover:bg-yellow-100"
-                        )}
-                      >
-                        {preset}
-                      </button>
-                    ))}
-                  </div>
-
-                  <textarea
-                    value={userNote}
-                    onChange={(e) => setUserNote(e.target.value)}
-                    placeholder="or write your note here in your own words..."
-                    rows={2}
-                    className="w-full bg-yellow-50/70 border-2 border-dashed border-blue-900/40 rounded-lg p-2.5 text-lg font-handwriting text-blue-950 font-semibold focus:outline-none focus:border-black placeholder:text-blue-900/40 resize-none leading-tight"
-                  />
-                </div>
               </div>
             )}
 
@@ -725,14 +678,14 @@ function DatingApp() {
                   <span className="font-bold text-blue-900">Something nice</span>
                 </div>
 
-                {/* VISIBLE & PROMINENT HANDWRITTEN PEN INK NOTE */}
+                {/* VISIBLE & PROMINENT HANDWRITTEN DATE-DESTROYING RULE */}
                 <div className="mt-2 bg-white/95 border-2 border-black rounded-lg p-3 space-y-1 relative rotate-[-0.5deg] shadow-sm">
                   <div className="tape-strip -top-2.5 left-6 -rotate-2" />
-                  <span className="font-handwriting text-sm text-black/50 font-bold block uppercase tracking-wide">
-                    handwritten note:
+                  <span className="font-handwriting text-sm text-red-600 font-bold block uppercase tracking-wide">
+                    date-destroying rule (non-negotiable):
                   </span>
-                  <p className="font-handwriting text-2xl text-blue-800 leading-snug font-bold">
-                    "{displayNote || userNote || "Don't be late"}"
+                  <p className="font-handwriting text-2xl text-blue-900 leading-snug font-bold">
+                    "{assignedRule || "Don't be late"}"
                   </p>
                 </div>
               </div>
@@ -768,8 +721,7 @@ function DatingApp() {
                   setDate(undefined);
                   setTime(null);
                   setLocation(null);
-                  setUserNote("");
-                  setDisplayNote("");
+                  setAssignedRule("");
                   window.history.replaceState({}, "", window.location.pathname);
                 }}
                 className="text-center w-full font-mono text-xs text-black/40 hover:text-black py-1"
