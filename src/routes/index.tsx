@@ -153,15 +153,15 @@ const DRINK_OPTIONS: {
 
 const FUNNY_ABSURD_NOTES = [
   "Don't be late",
-  "Strictly no crypto talk",
+  "No talking about your ex",
   "You must laugh at at least two of my jokes",
   "No acoustic guitars allowed",
-  "I am legally required to be charming",
-  "First one to check their phone buys dessert",
-  "Prepare to defend your worst opinion",
-  "I will pretend to understand your job",
-  "No discussing astrology before 8 PM",
-  "Must bring top tier gossip",
+  "Do not invite your mom",
+  "No chewing with your mouth open",
+  "No trauma dumping before drinks arrive",
+  "No ordering for both of us without asking",
+  "No showing me 40 pictures of your pet",
+  "If you clap when the plane lands we leave",
 ];
 
 const COFFEE_TIME_SLOTS = ["4:00 PM", "4:30 PM", "5:00 PM", "5:30 PM", "6:00 PM", "6:30 PM", "7:00 PM"];
@@ -625,11 +625,11 @@ function DatingApp() {
                   <div className="flex flex-wrap gap-1.5">
                     {[
                       "Don't be late",
-                      "Strictly no crypto talk",
+                      "No talking about your ex",
                       "Must laugh at my jokes",
-                      "First round is on you",
                       "No acoustic guitars",
-                      "Prepare good gossip",
+                      "Do not invite your mom",
+                      "No chewing with open mouth",
                     ].map((preset) => (
                       <button
                         key={preset}
