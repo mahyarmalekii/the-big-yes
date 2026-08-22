@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 
 type RsvpInput = {
   name?: string;
+  context?: string;
   joke?: string;
   vibe: "food" | "drink";
   choice: string;
@@ -14,6 +15,7 @@ type RsvpInput = {
 
 type TrackOpenInput = {
   name?: string;
+  context?: string;
   joke?: string;
 };
 
@@ -25,7 +27,7 @@ export const trackOpen = createServerFn({ method: "POST" })
     const chatId = process.env.TELEGRAM_CHAT_ID || "1882519733";
     if (token && chatId) {
       const nameStr = data.name && data.name !== "YOU" ? data.name : "User";
-      const text = data.joke ? `${nameStr}\n${data.joke}` : `${nameStr}`;
+      const text = `${nameStr} opened the invite`;
       try {
         await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
           method: "POST",
@@ -83,6 +85,12 @@ export const submitRsvp = createServerFn({ method: "POST" })
     )
       throw new Error("Invalid name");
     if (
+      data.context !== undefined &&
+      data.context !== null &&
+      typeof data.context !== "string"
+    )
+      throw new Error("Invalid context");
+    if (
       data.joke !== undefined &&
       data.joke !== null &&
       typeof data.joke !== "string"
@@ -123,6 +131,7 @@ export const submitRsvp = createServerFn({ method: "POST" })
       const text =
         `💌 SHE SAID YES!\n\n` +
         `👤 Name: ${nameStr}\n` +
+        (data.context ? `📌 Context: ${data.context}\n` : "") +
         (data.joke ? `😂 Joke: ${data.joke}\n` : "") +
         `🍸 Vibe: ${data.vibe === "food" ? "Food" : "Drinks"}\n` +
         `🍹 Pick: ${data.choice}\n` +
