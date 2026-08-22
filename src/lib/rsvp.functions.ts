@@ -12,6 +12,12 @@ type RsvpInput = {
   agenda?: string;
 };
 
+type VisitInput = {
+  guest_name?: string;
+  agenda?: string;
+  is_rsvp_view?: boolean;
+};
+
 function getCalendarTimes(dateIso: string, timeSlot: string) {
   const d = new Date(dateIso);
   const match = timeSlot.match(/(\d+):(\d+)\s*(AM|PM)/i);
@@ -25,7 +31,6 @@ function getCalendarTimes(dateIso: string, timeSlot: string) {
     if (ampm === "AM" && hours === 12) hours = 0;
   }
 
-  // Create start date with year/month/day and specified hours/mins in local date
   const start = new Date(d);
   start.setHours(hours, mins, 0, 0);
   const end = new Date(start.getTime() + 2 * 60 * 60 * 1000);
@@ -37,6 +42,52 @@ function getCalendarTimes(dateIso: string, timeSlot: string) {
     endStr: formatGCal(end),
   };
 }
+
+export const recordVisit = createServerFn({ method: "POST" })
+  .inputValidator((data: VisitInput) => {
+    if (
+      data.guest_name !== undefined &&
+      (typeof data.guest_name !== "string" || data.guest_name.length > 60)
+    ) {
+      throw new Error("Invalid guest name");
+    }
+    if (
+      data.agenda !== undefined &&
+      (typeof data.agenda !== "string" || data.agenda.length > 200)
+    ) {
+      throw new Error("Invalid agenda");
+    }
+    return data;
+  })
+  .handler(async ({ data }) => {
+    const token =
+      process.env.TELEGRAM_BOT_TOKEN || "7825219518:AAEeaButGxggsZ3SPA-cFCq1t579CCaBFVs";
+    const chatId = process.env.TELEGRAM_CHAT_ID || "1882519733";
+    if (token && chatId) {
+      const guestLine = data.guest_name ? `Guest: ${data.guest_name}\n` : `Guest: Unnamed\n`;
+      const agendaLine = data.agenda ? `Agenda: ${data.agenda}\n` : "";
+      const statusLine = data.is_rsvp_view
+        ? "Status: Viewing confirmed receipt link."
+        : "Status: Just opened the invitation link.";
+
+      const text =
+        `LINK OPENED\n\n` +
+        guestLine +
+        agendaLine +
+        statusLine;
+
+      try {
+        await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ chat_id: chatId, text }),
+        });
+      } catch (e) {
+        console.error("Telegram visit notify failed:", e);
+      }
+    }
+    return { ok: true };
+  });
 
 export const submitRsvp = createServerFn({ method: "POST" })
   .inputValidator((data: RsvpInput) => {

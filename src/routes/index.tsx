@@ -20,7 +20,7 @@ import {
 } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
-import { submitRsvp } from "@/lib/rsvp.functions";
+import { submitRsvp, recordVisit } from "@/lib/rsvp.functions";
 import { Sketch3DCanvas } from "@/components/3d/Sketch3DCanvas";
 import { Diorama3D } from "@/components/3d/Diorama3D";
 import { TiltCard } from "@/components/3d/TiltCard";
@@ -207,24 +207,30 @@ function DatingApp() {
     const rawN = params.get("n");
     const rawJoke = params.get("joke") || params.get("msg") || params.get("topic");
 
+    let parsedName = "YOU";
+    let parsedJoke = rawJoke ? rawJoke.trim() : null;
+
     if (rawN) {
       if (rawN.includes("\n")) {
         const lines = rawN.split("\n").map((l) => l.trim()).filter(Boolean);
-        setName(lines[0] || "YOU");
-        if (!rawJoke && lines.length > 1) {
-          setJoke(lines.slice(1).join(" "));
+        parsedName = lines[0] || "YOU";
+        if (!parsedJoke && lines.length > 1) {
+          parsedJoke = lines.slice(1).join(" ");
         }
       } else {
-        setName(rawN.trim());
+        parsedName = rawN.trim();
       }
+      setName(parsedName);
     }
 
-    if (rawJoke) setJoke(rawJoke.trim());
+    if (parsedJoke) setJoke(parsedJoke);
 
     const nk = params.get("nick");
     if (nk) setNick(nk.trim());
 
-    if (params.get("rsvp") === "1") {
+    const isRsvp = params.get("rsvp") === "1";
+
+    if (isRsvp) {
       if (params.get("k")) setPick(params.get("k") as DrinkPick);
       if (params.get("d")) setDate(new Date(params.get("d")!));
       if (params.get("t")) setTime(params.get("t"));
@@ -233,6 +239,20 @@ function DatingApp() {
         if (found) setLocation(found);
       }
       setStep("done");
+    }
+
+    // Notify on Telegram when the link is opened (deduplicated per session)
+    const sessionKey = `visit_notified_${parsedName}_${isRsvp ? "rsvp" : "ask"}`;
+    if (typeof window !== "undefined" && !sessionStorage.getItem(sessionKey)) {
+      sessionStorage.setItem(sessionKey, "1");
+      const guestForNotify = parsedName !== "YOU" ? parsedName : undefined;
+      recordVisit({
+        data: {
+          guest_name: guestForNotify,
+          agenda: parsedJoke || undefined,
+          is_rsvp_view: isRsvp,
+        },
+      }).catch((err) => console.error("Visit recording failed:", err));
     }
   }, []);
 
