@@ -151,6 +151,33 @@ const DRINK_OPTIONS: {
   },
 ];
 
+const DRINK_JOKE_NOTES: Record<string, string[]> = {
+  beer: [
+    "First round on me, no talking about work allowed",
+    "Permission granted to judge my music taste",
+    "Casual vibes and zero pretension guaranteed",
+    "Cold drinks and high quality conversation",
+  ],
+  wine: [
+    "I promise not to pretend I know what vintage it is",
+    "High probability of accidental deep life conversations",
+    "Very classy until the second glass arrives",
+    "Tasting notes: great vibes and exceptional company",
+  ],
+  cocktail: [
+    "100 percent chemistry, zero hangover, crushing work tomorrow",
+    "Dangerous levels of charisma and staying sharp",
+    "Staying hydrated, sharp, and suspiciously charming",
+    "Botanical elixirs and top tier banter",
+  ],
+  coffee: [
+    "This quick coffee is definitely turning into a 3 hour talk",
+    "Pastry sharing policy: strictly 50/50",
+    "Caffeine fueled banter and great stories ahead",
+    "An excuse to talk until they close the shop",
+  ],
+};
+
 const COFFEE_TIME_SLOTS = ["4:00 PM", "4:30 PM", "5:00 PM", "5:30 PM", "6:00 PM", "6:30 PM", "7:00 PM"];
 const NON_ALCOHOLIC_TIME_SLOTS = ["5:00 PM", "5:30 PM", "6:00 PM", "6:30 PM", "7:00 PM", "7:30 PM", "8:00 PM", "8:30 PM", "9:00 PM", "9:30 PM"];
 const EVENING_TIME_SLOTS = ["6:00 PM", "7:00 PM", "7:30 PM", "8:00 PM", "8:30 PM", "9:00 PM", "9:30 PM"];
@@ -163,6 +190,7 @@ function DatingApp() {
   const [time, setTime] = useState<string | null>(null);
   const [location, setLocation] = useState<LocationPick | null>(null);
   const [userNote, setUserNote] = useState("");
+  const [displayNote, setDisplayNote] = useState("");
   const [noPos, setNoPos] = useState({ x: 0, y: 0, n: 0 });
   const [copied, setCopied] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -171,6 +199,12 @@ function DatingApp() {
     const params = new URLSearchParams(window.location.search);
     const n = params.get("n");
     if (n) setName(n);
+
+    const customNote = params.get("m") || params.get("note");
+    if (customNote) {
+      setUserNote(customNote);
+      setDisplayNote(customNote);
+    }
 
     if (params.get("rsvp") === "1") {
       if (params.get("k")) setPick(params.get("k") as DrinkPick);
@@ -199,9 +233,10 @@ function DatingApp() {
       d: date?.toISOString() ?? "",
       t: time ?? "",
       l: location?.url ?? "",
+      m: displayNote || userNote || "",
     });
     return `${window.location.origin}${window.location.pathname}?${p.toString()}`;
-  }, [name, pick, date, time, location]);
+  }, [name, pick, date, time, location, displayNote, userNote]);
 
   const dodge = () => {
     setNoPos({
@@ -234,6 +269,14 @@ function DatingApp() {
 
     setLocation(assignedLocation);
 
+    const typedNote = userNote.trim();
+    let finalNote = typedNote;
+    if (!finalNote) {
+      const jokes = DRINK_JOKE_NOTES[pick] || DRINK_JOKE_NOTES.cocktail;
+      finalNote = jokes[Math.floor(Math.random() * jokes.length)];
+    }
+    setDisplayNote(finalNote);
+
     try {
       await submitRsvp({
         data: {
@@ -243,7 +286,7 @@ function DatingApp() {
           time_slot: time,
           location_url: assignedLocation.url,
           location_name: assignedLocation.label,
-          user_note: userNote.trim() || undefined,
+          user_note: typedNote || finalNote,
         },
       });
     } catch (error) {
@@ -585,15 +628,42 @@ function DatingApp() {
                   </p>
                 </div>
 
-                <div className="note-card p-3 bg-white border border-black/20 rotate-[0.5deg] relative mt-1 space-y-1">
+                <div className="note-card p-3 bg-white border border-black/20 rotate-[0.5deg] relative mt-1 space-y-2">
                   <div className="tape-strip -top-2.5 left-8 -rotate-2" />
-                  <label className="font-handwriting text-base text-blue-900 font-semibold block">
-                    a note for me (optional):
-                  </label>
+                  <div className="flex items-center justify-between">
+                    <label className="font-handwriting text-base text-blue-900 font-semibold block">
+                      leave a note for me (optional):
+                    </label>
+                    <span className="font-mono text-[10px] text-black/40 uppercase">quick picks</span>
+                  </div>
+
+                  <div className="flex flex-wrap gap-1.5">
+                    {[
+                      "Don't be late",
+                      "First round is on you",
+                      "No talking about work",
+                      "Wear something cool",
+                    ].map((preset) => (
+                      <button
+                        key={preset}
+                        type="button"
+                        onClick={() => setUserNote(preset)}
+                        className={cn(
+                          "px-2.5 py-1 rounded border text-[11px] font-mono transition-all",
+                          userNote === preset
+                            ? "bg-yellow-300 border-black font-bold text-black shadow-xs"
+                            : "bg-yellow-50/90 border-black/25 text-black/80 hover:border-black hover:bg-yellow-100"
+                        )}
+                      >
+                        {preset}
+                      </button>
+                    ))}
+                  </div>
+
                   <textarea
                     value={userNote}
                     onChange={(e) => setUserNote(e.target.value)}
-                    placeholder="e.g. don't be late, special requests, or secret code words..."
+                    placeholder="or type your own custom note or joke..."
                     rows={2}
                     className="w-full bg-yellow-50/60 border border-black/20 rounded p-2 text-xs font-handwriting text-black focus:outline-none focus:border-black placeholder:text-black/40 resize-none"
                   />
@@ -659,21 +729,23 @@ function DatingApp() {
                 </div>
                 <div className="flex justify-between items-center pb-1.5 border-b border-black/10">
                   <span className="text-black/50 uppercase">Spot</span>
-                  <span className="font-bold text-right truncate max-w-[190px]">
+                  <span className="font-bold text-right truncate max-w-[200px]">
                     {location?.label ?? "Curated Spot"}
                   </span>
                 </div>
-                {userNote && (
-                  <div className="flex justify-between items-start pb-1.5 border-b border-black/10">
-                    <span className="text-black/50 uppercase">Note</span>
-                    <span className="font-bold text-right truncate max-w-[190px] font-handwriting text-blue-900">
-                      "{userNote}"
-                    </span>
-                  </div>
-                )}
-                <div className="flex justify-between items-center">
+                <div className="flex justify-between items-center pb-1.5 border-b border-black/10">
                   <span className="text-black/50 uppercase">Dress Code</span>
                   <span className="font-bold text-blue-900">Something nice</span>
+                </div>
+
+                {/* VISIBLE & PROMINENT SPECIAL NOTE / VIBE CARD */}
+                <div className="mt-2 bg-yellow-100/90 border-2 border-blue-900/30 rounded-md p-3 space-y-1 relative shadow-xs">
+                  <span className="font-mono text-[10px] text-blue-900 font-bold uppercase tracking-wider block">
+                    Special Note / Vibe:
+                  </span>
+                  <p className="font-handwriting text-lg text-blue-950 leading-snug font-bold">
+                    "{displayNote || userNote || "Looking forward to this all week"}"
+                  </p>
                 </div>
               </div>
 
@@ -709,6 +781,7 @@ function DatingApp() {
                   setTime(null);
                   setLocation(null);
                   setUserNote("");
+                  setDisplayNote("");
                   window.history.replaceState({}, "", window.location.pathname);
                 }}
                 className="text-center w-full font-mono text-xs text-black/40 hover:text-black py-1"
