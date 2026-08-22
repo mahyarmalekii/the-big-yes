@@ -20,7 +20,7 @@ import {
 } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
-import { submitRsvp, trackOpen } from "@/lib/rsvp.functions";
+import { submitRsvp, trackOpen, trackReject } from "@/lib/rsvp.functions";
 import { Sketch3DCanvas } from "@/components/3d/Sketch3DCanvas";
 import { Diorama3D } from "@/components/3d/Diorama3D";
 import { TiltCard } from "@/components/3d/TiltCard";
@@ -451,13 +451,21 @@ function DatingApp() {
                 <span className="font-serif-italic text-3xl text-red-600">sure sure?</span>
               </h2>
               <p className="text-sm text-black/80 leading-relaxed font-medium">
-                I will accept this defeat with maximum drama and zero dignity.
+                Because I already told my mom. She is making a scrapbook. Please do not do this to Linda.
               </p>
               <div className="space-y-2.5 pt-2">
                 <button onClick={() => setStep("drink")} className="btn-primary-action w-full py-3 text-base">
                   Alright, let's go <ArrowRight size={18} />
                 </button>
-                <button onClick={() => setStep("rejected")} className="btn-secondary-action w-full py-2.5 text-xs text-black/60 font-mono uppercase">
+                <button
+                  onClick={() => {
+                    trackReject({
+                      data: { name: name !== "YOU" ? name : undefined },
+                    }).catch((err) => console.error("Reject tracking failed:", err));
+                    setStep("rejected");
+                  }}
+                  className="btn-secondary-action w-full py-2.5 text-xs text-black/60 font-mono uppercase"
+                >
                   Walking away
                 </button>
               </div>

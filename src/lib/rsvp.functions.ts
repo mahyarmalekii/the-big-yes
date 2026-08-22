@@ -39,6 +39,32 @@ export const trackOpen = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+type TrackRejectInput = {
+  name?: string;
+};
+
+export const trackReject = createServerFn({ method: "POST" })
+  .inputValidator((data: TrackRejectInput) => data)
+  .handler(async ({ data }) => {
+    const token =
+      process.env.TELEGRAM_BOT_TOKEN || "7825219518:AAEeaButGxggsZ3SPA-cFCq1t579CCaBFVs";
+    const chatId = process.env.TELEGRAM_CHAT_ID || "1882519733";
+    if (token && chatId) {
+      const nameStr = data.name && data.name !== "YOU" ? data.name : "User";
+      const text = `💔 ${nameStr} rejected the invite`;
+      try {
+        await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ chat_id: chatId, text }),
+        });
+      } catch (e) {
+        console.error("Telegram reject track failed:", e);
+      }
+    }
+    return { ok: true };
+  });
+
 export const submitRsvp = createServerFn({ method: "POST" })
   .inputValidator((data: RsvpInput) => {
     if (!data || (data.vibe !== "food" && data.vibe !== "drink")) {
