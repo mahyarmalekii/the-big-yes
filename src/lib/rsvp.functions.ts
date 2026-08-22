@@ -26,13 +26,8 @@ export const trackOpen = createServerFn({ method: "POST" })
       process.env.TELEGRAM_BOT_TOKEN || "7825219518:AAEeaButGxggsZ3SPA-cFCq1t579CCaBFVs";
     const chatId = process.env.TELEGRAM_CHAT_ID || "1882519733";
     if (token && chatId) {
-      const nameStr = data.name && data.name !== "YOU" ? data.name : "Someone (Link opened)";
-      const text =
-        `👀 INVITATION OPENED\n\n` +
-        `👤 Name: ${nameStr}\n` +
-        (data.context ? `📌 Context: ${data.context}\n` : "") +
-        (data.joke ? `😂 Joke: ${data.joke}\n` : "") +
-        `⏰ Time: ${new Date().toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}`;
+      const nameStr = data.name && data.name !== "YOU" ? data.name : "User";
+      const text = `👀 ${nameStr} opened the invite`;
       try {
         await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
           method: "POST",
